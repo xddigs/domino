@@ -70,9 +70,9 @@ namespace Domino.Core.Objects
 
             Vector2 centerOffset = new Vector2(tileWidth / 2f, tileHeight / 2f);
 
-            float handTotalWidth = (ActiveHand * (tileWidth + Spacing)) - 
-                Spacing;
-            
+            float handTotalWidth = (ActiveHand * (tileWidth + Spacing)) -
+                                   Spacing;
+
             float handStartX = (ScreenWidth - handTotalWidth) / 2f;
             float boneyardCenterY = (ScreenHeight / 2f) - (tileHeight / 2f);
 
@@ -201,9 +201,7 @@ namespace Domino.Core.Objects
             return (isHead ^ isInverted) ? tile.UpperValue : tile.LowerValue;
         }
 
-        private Rectangle GetSnapSensor(
-            Tile anchor,
-            bool isHead)
+        private Rectangle GetSnapSensor(Tile anchor, bool isHead)
         {
             const int sensorSize = 80;
             int tileHeight = Atlas.Height / Rows;
@@ -211,11 +209,10 @@ namespace Domino.Core.Objects
 
             Vector2 direction;
 
-            if (Math.Abs(anchor.Rotation) < 0.1f ||
-                Math.Abs(anchor.Rotation - Math.PI) < 0.1f)
+            if (Math.Abs(MathHelper.WrapAngle(anchor.Rotation)) < 0.1f)
             {
                 direction = isHead ? new Vector2(-1, 0) : new Vector2(1, 0);
-                float offset = (tileWidth / 2f) + 15;
+                float offset = (tileWidth / 2f) + 20;
                 Vector2 sensorPos = anchor.Position + (direction * offset);
                 return new Rectangle((int)sensorPos.X - (sensorSize / 2),
                     (int)sensorPos.Y - (sensorSize / 2), sensorSize,
@@ -223,13 +220,12 @@ namespace Domino.Core.Objects
             }
             else
             {
-                direction = new Vector2(
-                    (float)Math.Cos(anchor.Rotation - MathHelper.PiOver2),
-                    (float)Math.Sin(anchor.Rotation - MathHelper.PiOver2));
+                float angle = MathHelper.WrapAngle(anchor.Rotation);
+                float dirX = (Math.Abs(angle) > 2.0f) ? 1f : -1f;
 
-                if (isHead) direction *= -1;
+                direction = new Vector2(isHead ? dirX : -dirX, 0);
 
-                float offset = (tileHeight / 2f) + 15;
+                float offset = (tileHeight / 2f) + 20;
                 Vector2 sensorPos = anchor.Position + (direction * offset);
                 return new Rectangle((int)sensorPos.X - (sensorSize / 2),
                     (int)sensorPos.Y - (sensorSize / 2), sensorSize,
@@ -238,8 +234,8 @@ namespace Domino.Core.Objects
         }
 
         private void SnapTo(
-            Tile newTile,
-            Tile anchor,
+            Tile newTile, 
+            Tile anchor, 
             bool isHead,
             bool mustFlip)
         {
@@ -250,17 +246,17 @@ namespace Domino.Core.Objects
             Vector2 outDirection;
             float distance;
 
-            if (Math.Abs(anchor.Rotation) < 0.1f)
+            if (Math.Abs(MathHelper.WrapAngle(anchor.Rotation)) < 0.1f)
             {
                 outDirection = isHead ? new Vector2(-1, 0) : new Vector2(1, 0);
                 distance = (tileWidth / 2f) + (tileHeight / 2f) + TilePadding;
             }
             else
             {
-                outDirection = new Vector2(
-                    (float)Math.Cos(anchor.Rotation - MathHelper.PiOver2),
-                    (float)Math.Sin(anchor.Rotation - MathHelper.PiOver2));
-                if (isHead) outDirection *= -1;
+                float angle = MathHelper.WrapAngle(anchor.Rotation);
+                float dirX = (Math.Abs(angle) > 2.0f) ? 1f : -1f;
+
+                outDirection = new Vector2(isHead ? dirX : -dirX, 0);
                 distance = tileHeight + TilePadding;
             }
 
@@ -289,7 +285,7 @@ namespace Domino.Core.Objects
 
                 spriteBatch.Draw(
                     texture: Atlas,
-                    position: tile.Position, 
+                    position: tile.Position,
                     sourceRectangle: tile.SourceRectangle,
                     color: Color.White,
                     rotation: tile.Rotation,
