@@ -15,6 +15,11 @@ namespace Domino.Core.Objects
         private readonly Vector2 _headDirection = new(-1, 0);
         private readonly Vector2 _tailDirection = new(1, 0);
 
+        private Tile _ghostTile;
+        private Vector2 _ghostPosition;
+        private float _ghostRotation;
+        private bool _showGhost;
+
         private const int Cols = 7;
         private const int Rows = 4;
         private const int ScreenWidth = 1280;
@@ -110,6 +115,58 @@ namespace Domino.Core.Objects
 
                 tile.Position += centerOffset;
                 tile.LastPosition = tile.Position;
+            }
+        }
+
+        public void UpdateGhost(
+            Tile draggingTile, 
+            Vector2 mousePosition)
+        {
+            _showGhost = false;
+            if (ActiveTiles.Count == 0) return;
+
+            Tile head = ActiveTiles.First!.Value;
+            Tile tail = ActiveTiles.Last!.Value;
+
+            float distHead = Vector2.Distance(mousePosition, head.Position);
+            float distTail = Vector2.Distance(mousePosition, tail.Position);
+
+            Tile anchor = null;
+            bool isHead = false;
+
+            if (distHead < SnapThreshold)
+            {
+                anchor = head;
+                isHead = true;
+            }
+            else if (distTail < SnapThreshold)
+            {
+                anchor = tail;
+            }
+
+            if (anchor != null && CanConnect(
+                    newTile: draggingTile,
+                    anchor: anchor,
+                    isHead: isHead,
+                    mustFlip: out bool mustFlip))
+            {
+                _ghostTile = draggingTile;
+                Vector2 originalPos = draggingTile.Position;
+                float originalRot = draggingTile.Rotation;
+
+                SnapTo(
+                    newTile: draggingTile,
+                    anchor: anchor,
+                    isHead: isHead,
+                    mustFlip: mustFlip);
+
+                _ghostPosition = draggingTile.Position;
+                _ghostRotation = draggingTile.Rotation;
+
+                draggingTile.Position = originalPos;
+                draggingTile.Rotation = originalRot;
+
+                _showGhost = true;
             }
         }
 
@@ -224,13 +281,9 @@ namespace Domino.Core.Objects
             bool anchorIsDouble = anchor.UpperValue == anchor.LowerValue;
 
             float distance;
-            if (anchorIsDouble)
+            if (anchorIsDouble || isDouble)
             {
                 distance = (tileWidth / 2f) + (tileHeight / 2f) + TilePadding;
-            }
-            else if (isDouble)
-            {
-                distance = (tileHeight / 2f) + (tileWidth / 2f) + TilePadding;
             }
             else
             {
@@ -298,7 +351,7 @@ namespace Domino.Core.Objects
                 Vector2 origin = new Vector2(
                     tile.SourceRectangle.Width / 2f,
                     tile.SourceRectangle.Height / 2f);
-
+                
                 spriteBatch.Draw(
                     texture: Atlas,
                     position: tile.Position,
@@ -309,6 +362,25 @@ namespace Domino.Core.Objects
                     scale: tile.Scale,
                     effects: SpriteEffects.None,
                     layerDepth: 0f
+                );
+            }
+            
+            if (_showGhost && _ghostTile != null)
+            {
+                Vector2 ghostOrigin = new Vector2(
+                    _ghostTile.SourceRectangle.Width / 2f,
+                    _ghostTile.SourceRectangle.Height / 2f);
+                
+                spriteBatch.Draw(
+                    texture: Atlas,
+                    position: _ghostPosition,
+                    sourceRectangle: _ghostTile.SourceRectangle,
+                    color: Color.White * 0.15f,
+                    rotation: _ghostRotation,
+                    origin: ghostOrigin,
+                    scale: 1.0f,
+                    effects: SpriteEffects.None,
+                    layerDepth: 0.1f
                 );
             }
         }

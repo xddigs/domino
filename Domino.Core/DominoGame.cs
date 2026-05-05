@@ -20,8 +20,8 @@ namespace Domino.Core
         public int Score { get; set; }
         public bool IsGameOver { get; set; }
 
-        public static readonly bool IsMobile =
-            OperatingSystem.IsAndroid() || OperatingSystem.IsIOS();
+        public static readonly bool IsMobile = OperatingSystem.IsAndroid() ||
+                                                OperatingSystem.IsIOS();
 
         public static readonly bool IsDesktop = OperatingSystem.IsMacOS() ||
                                                 OperatingSystem.IsLinux() ||

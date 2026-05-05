@@ -69,11 +69,15 @@ namespace Domino.Core.Systems
                         targetRotation, lerpSpeed);
                     
                     selectedTile.LastPosition = selectedTile.Position;
+                    Table.UpdateGhost(
+                        draggingTile: selectedTile, 
+                        mousePosition: mousePosition);
                 }
             }
             else
             {
                 const float lerpSpeed = 0.15f;
+                Table.UpdateGhost(null, Vector2.Zero);
                 Tile releasedTile = selectedTile;
                 if (selectedTile != null)
                 {
