@@ -30,6 +30,7 @@ namespace Domino.Core
         {
             _graphics = new GraphicsDeviceManager(this);
             Services.AddService(_graphics);
+            IsMouseVisible = true;
             
             Content.RootDirectory = "Content";
 
@@ -49,8 +50,7 @@ namespace Domino.Core
         protected override void Update(GameTime gameTime)
         {
             var mouseState = Mouse.GetState();
-            Vector2 mousePosition = new Vector2(mouseState.X,
-                mouseState.Y);
+            Vector2 mousePosition = new Vector2(mouseState.X, mouseState.Y);
 
             if (mouseState.LeftButton == ButtonState.Pressed)
             {
@@ -67,14 +67,30 @@ namespace Domino.Core
                 }
                 else
                 {
-                    _selectedTile.Position = mousePosition - new Vector2(
-                        _selectedTile.SourceRectangle.Width / 2f,
+                    Vector2 targetPos = mousePosition - new Vector2(
+                        _selectedTile.SourceRectangle.Width / 2f, 
                         _selectedTile.SourceRectangle.Height / 2f);
+                    
+                    _selectedTile.Position = Vector2.Lerp(
+                        _selectedTile.Position, targetPos, 0.4f);
+                    
+                    Vector2 delta = _selectedTile.Position - 
+                                    _selectedTile.LastPosition;
+                    
+                    float targetRotation = delta.X * 0.04f;
+                    _selectedTile.Rotation = MathHelper.Lerp(
+                        _selectedTile.Rotation, 
+                        targetRotation, 0.5f);
+                    
+                    _selectedTile.LastPosition = _selectedTile.Position;
                 }
             }
             else
             {
                 _selectedTile = null;
+                foreach(var t in Table.Tiles) {
+                    t.Rotation = MathHelper.Lerp(t.Rotation, 0, 0.1f);
+                }
             }
 
             base.Update(gameTime);

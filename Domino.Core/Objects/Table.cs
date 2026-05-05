@@ -79,11 +79,22 @@ namespace Domino.Core.Objects
         {
             foreach (var tile in Tiles)
             {
+                Vector2 origin = new Vector2(
+                    tile.SourceRectangle.Width / 2f, 
+                    tile.SourceRectangle.Height / 2f);
+                
+                Vector2 drawPosition = tile.Position + origin;
+
                 spriteBatch.Draw(
-                    Atlas, 
-                    tile.Position,
-                    tile.SourceRectangle,
-                    Color.White
+                    texture: Atlas, 
+                    position: drawPosition,
+                    sourceRectangle: tile.SourceRectangle,
+                    color: Color.White,
+                    rotation: tile.Rotation,
+                    origin: origin,
+                    scale: 1.0f,
+                    effects: SpriteEffects.None, 
+                    layerDepth: 0f
                 );
             }
         }

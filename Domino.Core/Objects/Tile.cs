@@ -12,6 +12,10 @@ namespace Domino.Core.Objects
         public bool IsDragging { get; set; }
         public Rectangle Bounds => new((int)Position.X, (int)Position.Y, 
             SourceRectangle.Width, SourceRectangle.Height);
+        
+        public float Rotation;
+        public Vector2 Velocity;
+        public Vector2 LastPosition { get; set; }
 
         public Tile(int upperValue, int lowerValue, Rectangle sourceRect)
         {
