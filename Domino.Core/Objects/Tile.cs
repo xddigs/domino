@@ -16,8 +16,12 @@ namespace Domino.Core.Objects
         public Vector2 Velocity { get; set; }
         public Vector2 LastPosition { get; set; }
         
-        public Rectangle Bounds => new((int)Position.X, (int)Position.Y, 
-            SourceRectangle.Width, SourceRectangle.Height);
+        public Rectangle Bounds => 
+            new(
+                (int)Position.X, 
+                (int)Position.Y, 
+                SourceRectangle.Width, 
+                SourceRectangle.Height);
 
         public Tile(int upperValue, int lowerValue, Rectangle sourceRect)
         {
