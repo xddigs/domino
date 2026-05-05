@@ -59,7 +59,7 @@ namespace Domino.Core
                 game: this,
                 selectedTile: ref _selectedTile,
                 gameTime: gameTime);
-            
+
             base.Update(gameTime);
         }
 
