@@ -17,6 +17,9 @@ namespace Domino.Core.Objects
         public Vector2 Velocity { get; set; }
         public Vector2 LastPosition { get; set; }
 
+        public int? HeadValue { get; set; }
+        public int? TailValue { get; set; }
+        
         public Rectangle Bounds
         {
             get

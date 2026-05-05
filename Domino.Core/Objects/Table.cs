@@ -12,6 +12,9 @@ namespace Domino.Core.Objects
         public LinkedList<Tile> ActiveTiles { get; }
         public Texture2D Atlas { get; }
 
+        private readonly Vector2 _headDirection = new(-1, 0);
+        private readonly Vector2 _tailDirection = new(1, 0);
+
         private const int Cols = 7;
         private const int Rows = 4;
         private const int ScreenWidth = 1280;
@@ -113,7 +116,7 @@ namespace Domino.Core.Objects
         public void TryPlaceTile(Tile tile, Vector2 dropPosition)
         {
             if (ActiveTiles.Contains(tile)) return;
-            
+
             if (ActiveTiles.Count == 0)
             {
                 tile.Position = new Vector2(ScreenWidth / 2f,
@@ -121,13 +124,15 @@ namespace Domino.Core.Objects
                 tile.Rotation = 0f;
                 tile.Scale = 1.0f;
                 tile.LastPosition = tile.Position;
+                tile.HeadValue = tile.UpperValue;
+                tile.TailValue = tile.LowerValue;
                 ActiveTiles.AddFirst(tile);
                 return;
             }
 
             Tile head = ActiveTiles.First!.Value;
             Console.WriteLine($@"HEAD: {head.UpperValue}|{head.LowerValue}");
-            
+
             float distHead = Vector2.Distance(dropPosition, head.Position);
             if (distHead < SnapThreshold)
             {
@@ -151,7 +156,7 @@ namespace Domino.Core.Objects
 
             Tile tail = ActiveTiles.Last!.Value;
             Console.WriteLine($@"TAIL: {tail.UpperValue}|{tail.LowerValue}");
-            
+
             float distTail = Vector2.Distance(dropPosition, tail.Position);
             if (distTail < SnapThreshold)
             {
@@ -200,40 +205,12 @@ namespace Domino.Core.Objects
 
         private int GetOpenValue(Tile tile, bool isHead)
         {
-            float angle = MathHelper.WrapAngle(tile.Rotation);
-
-            if (Math.Abs(angle) < 0.1f ||
-                Math.Abs(Math.Abs(angle) - MathHelper.Pi) < 0.1f)
-            {
-                bool facingLeft = Math.Abs(angle) > MathHelper.PiOver2;
-
-                if (!facingLeft)
-                    return isHead ? tile.UpperValue : tile.LowerValue;
-                return isHead ? tile.LowerValue : tile.UpperValue;
-            }
-
-            bool upsideDown = angle < 0;
-
-            if (!upsideDown)
-                return isHead ? tile.UpperValue : tile.LowerValue;
-            return isHead ? tile.LowerValue : tile.UpperValue;
+            return isHead ? tile.HeadValue!.Value : tile.TailValue!.Value;
         }
 
-        private Vector2 GetAnchorDirection(Tile tile, bool isHead)
+        private Vector2 GetAnchorDirection(bool isHead)
         {
-            float angle = MathHelper.WrapAngle(tile.Rotation);
-
-            if (Math.Abs(angle) < 0.1f)
-            {
-                return isHead ? new Vector2(-1, 0) : new Vector2(1, 0);
-            }
-
-            bool isUpsideDown = angle < 0;
-
-            if (!isUpsideDown) return isHead ? 
-                new Vector2(0, -1) : new Vector2(0, 1);
-            
-            return isHead ? new Vector2(0, 1) : new Vector2(0, -1);
+            return isHead ? _headDirection : _tailDirection;
         }
 
         private void SnapTo(Tile newTile, Tile anchor, bool isHead,
@@ -242,7 +219,7 @@ namespace Domino.Core.Objects
             int tileHeight = Atlas.Height / Rows;
             int tileWidth = Atlas.Width / Cols;
 
-            Vector2 outDirection = GetAnchorDirection(anchor, isHead);
+            Vector2 outDirection = GetAnchorDirection(isHead);
 
             float distance;
             if (Math.Abs(MathHelper.WrapAngle(anchor.Rotation)) < 0.1f)
@@ -276,7 +253,29 @@ namespace Domino.Core.Objects
                     ? baseRotation + MathHelper.Pi
                     : baseRotation;
             }
+
             newTile.LastPosition = newTile.Position;
+
+            Console.WriteLine(
+                $@"SNAP: {newTile.Position} | Dir: {outDirection} | Head: {isHead}");
+
+            int connectingValue =
+                isHead ? anchor.HeadValue!.Value : anchor.TailValue!.Value;
+
+            if (isHead)
+            {
+                newTile.HeadValue = (newTile.UpperValue == connectingValue)
+                    ? newTile.LowerValue
+                    : newTile.UpperValue;
+                newTile.TailValue = connectingValue;
+            }
+            else
+            {
+                newTile.TailValue = (newTile.UpperValue == connectingValue)
+                    ? newTile.LowerValue
+                    : newTile.UpperValue;
+                newTile.HeadValue = connectingValue;
+            }
         }
 
         public void Shuffle()
