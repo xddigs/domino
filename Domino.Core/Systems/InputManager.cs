@@ -1,3 +1,4 @@
+using System;
 using Domino.Core.Objects;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -45,13 +46,14 @@ namespace Domino.Core.Systems
                 }
                 else
                 {
-                    const float rotationSpeed = 0.05f;
+                    const float rotationSpeed = 0.06f;
                     const float scaleSpeed = 0.2f;
                     const float lerpSpeed = 0.4f;
-                    const float lerpMouse = 0.5f;
+                    const float lerpMouse = 0.6f;
                     
                     selectedTile.Scale = MathHelper.Lerp(
-                        selectedTile.Scale, 1.2f, scaleSpeed);
+                        selectedTile.Scale, Math.Max(selectedTile.Scale, 1.5f),
+                        scaleSpeed);
 
                     Vector2 targetPos = mousePosition - new Vector2(
                         (selectedTile.SourceRectangle.Width *
@@ -83,7 +85,8 @@ namespace Domino.Core.Systems
                 foreach (var t in Table.Tiles)
                 {
                     t.Rotation = MathHelper.Lerp(t.Rotation, 0, lerpSpeed);
-                    t.Scale = MathHelper.Lerp(t.Scale, 1.0f, lerpSpeed);
+                    t.Scale = MathHelper.Lerp(t.Scale, Math.Min(1.0f, t.Scale), 
+                        lerpSpeed);
                 }
             }
         }
