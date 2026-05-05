@@ -1,13 +1,23 @@
 using System;
+using Domino.Core.Objects;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace Domino.Core
 {
     public class DominoGame : Game
     {
-        // Resources for drawing.
         private readonly GraphicsDeviceManager _graphics;
+        private SpriteBatch _spriteBatch;
+        
+        public Table Table { get; set; }
+        public Texture2D Atlas { get; set; }        
+        private Tile _selectedTile;
+        
+        public Random Random { get; } = new();
+        public int Score { get; set; }
+        public bool IsGameOver { get; set; }
 
         public static readonly bool IsMobile =
             OperatingSystem.IsAndroid() || OperatingSystem.IsIOS();
@@ -20,7 +30,7 @@ namespace Domino.Core
         {
             _graphics = new GraphicsDeviceManager(this);
             Services.AddService(_graphics);
-
+            
             Content.RootDirectory = "Content";
 
             _graphics.SupportedOrientations =
@@ -30,17 +40,42 @@ namespace Domino.Core
 
         protected override void LoadContent()
         {
+            _spriteBatch = new SpriteBatch(GraphicsDevice);
+            Atlas = Content.Load<Texture2D>("Sprites/dominoes");
+            Table = new Table(Atlas);
             base.LoadContent();
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back ==
-                ButtonState.Pressed
-                || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+            var mouseState = Mouse.GetState();
+            Vector2 mousePosition = new Vector2(mouseState.X,
+                mouseState.Y);
 
-            // TODO: Add your update logic here
+            if (mouseState.LeftButton == ButtonState.Pressed)
+            {
+                if (_selectedTile == null)
+                {
+                    for (int i = Table.Tiles.Count - 1; i >= 0; i--)
+                    {
+                        if (Table.Tiles[i].Bounds.Contains(mousePosition))
+                        {
+                            _selectedTile = Table.Tiles[i];
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    _selectedTile.Position = mousePosition - new Vector2(
+                        _selectedTile.SourceRectangle.Width / 2f,
+                        _selectedTile.SourceRectangle.Height / 2f);
+                }
+            }
+            else
+            {
+                _selectedTile = null;
+            }
 
             base.Update(gameTime);
         }
@@ -48,9 +83,15 @@ namespace Domino.Core
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.MonoGameOrange);
-
-            // TODO: Add your drawing code here
-
+            _spriteBatch.Begin(
+                sortMode: SpriteSortMode.Deferred,
+                blendState: BlendState.AlphaBlend,
+                samplerState: SamplerState.PointClamp,
+                depthStencilState: DepthStencilState.None,
+                rasterizerState: RasterizerState.CullCounterClockwise
+            );
+            Table.Draw(spriteBatch: _spriteBatch);   
+            _spriteBatch.End();
             base.Draw(gameTime);
         }
     }
