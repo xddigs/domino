@@ -23,7 +23,7 @@ namespace Domino.Core.Objects
         private const int OffscreenOffset = 100;
         private const int BoneyardX = 60;
         private const int StackOffset = 1;
-        private const int TilePadding = 5;
+        private const int TilePadding = -2;
 
         public Table(Texture2D atlas)
         {
@@ -68,9 +68,11 @@ namespace Domino.Core.Objects
             int tileWidth = Atlas.Width / Cols;
             int tileHeight = Atlas.Height / Rows;
 
-            float handTotalWidth = (ActiveHand *
-                                    (tileWidth + Spacing)) - Spacing;
+            Vector2 centerOffset = new Vector2(tileWidth / 2f, tileHeight / 2f);
 
+            float handTotalWidth = (ActiveHand * (tileWidth + Spacing)) - 
+                Spacing;
+            
             float handStartX = (ScreenWidth - handTotalWidth) / 2f;
             float boneyardCenterY = (ScreenHeight / 2f) - (tileHeight / 2f);
 
@@ -102,6 +104,7 @@ namespace Domino.Core.Objects
                     );
                 }
 
+                tile.Position += centerOffset;
                 tile.LastPosition = tile.Position;
             }
         }
@@ -163,53 +166,9 @@ namespace Domino.Core.Objects
             }
         }
 
-        private Rectangle GetSnapSensor(Tile anchor, bool isHead)
-        {
-            const int sensorSize = 80;
-            int tileHeight = Atlas.Height / Rows;
-            float offset = (tileHeight / 2f) + 10;
-
-            Vector2 direction = new Vector2(
-                (float)Math.Sin(anchor.Rotation),
-                -(float)Math.Cos(anchor.Rotation)
-            );
-
-            if (!isHead) direction *= -1;
-
-            Vector2 sensorPos = anchor.Position + (direction * offset);
-
-            return new Rectangle(
-                (int)sensorPos.X - (sensorSize / 2),
-                (int)sensorPos.Y - (sensorSize / 2),
-                sensorSize,
-                sensorSize
-            );
-        }
-
-        private int GetOpenValue(Tile tile, bool isHead)
-        {
-            float cos = (float)Math.Cos(tile.Rotation);
-            float sin = (float)Math.Sin(tile.Rotation);
-
-            if (Math.Abs(sin) < 0.5f)
-            {
-                bool isInverted = cos < 0;
-                return (isHead ^ isInverted)
-                    ? tile.UpperValue
-                    : tile.LowerValue;
-            }
-            else
-            {
-                bool isInverted = sin < 0;
-                return (isHead ^ isInverted)
-                    ? tile.UpperValue
-                    : tile.LowerValue;
-            }
-        }
-
         private bool CanConnect(
-            Tile newTile, 
-            Tile anchor, 
+            Tile newTile,
+            Tile anchor,
             out bool mustFlip)
         {
             mustFlip = false;
@@ -231,29 +190,82 @@ namespace Domino.Core.Objects
             return false;
         }
 
+        private int GetOpenValue(Tile tile, bool isHead)
+        {
+            float angle = MathHelper.WrapAngle(tile.Rotation);
+
+            if (Math.Abs(angle) < 0.1f)
+                return isHead ? tile.UpperValue : tile.LowerValue;
+
+            bool isInverted = angle < 0;
+            return (isHead ^ isInverted) ? tile.UpperValue : tile.LowerValue;
+        }
+
+        private Rectangle GetSnapSensor(
+            Tile anchor,
+            bool isHead)
+        {
+            const int sensorSize = 80;
+            int tileHeight = Atlas.Height / Rows;
+            int tileWidth = Atlas.Width / Cols;
+
+            Vector2 direction;
+
+            if (Math.Abs(anchor.Rotation) < 0.1f ||
+                Math.Abs(anchor.Rotation - Math.PI) < 0.1f)
+            {
+                direction = isHead ? new Vector2(-1, 0) : new Vector2(1, 0);
+                float offset = (tileWidth / 2f) + 15;
+                Vector2 sensorPos = anchor.Position + (direction * offset);
+                return new Rectangle((int)sensorPos.X - (sensorSize / 2),
+                    (int)sensorPos.Y - (sensorSize / 2), sensorSize,
+                    sensorSize);
+            }
+            else
+            {
+                direction = new Vector2(
+                    (float)Math.Cos(anchor.Rotation - MathHelper.PiOver2),
+                    (float)Math.Sin(anchor.Rotation - MathHelper.PiOver2));
+
+                if (isHead) direction *= -1;
+
+                float offset = (tileHeight / 2f) + 15;
+                Vector2 sensorPos = anchor.Position + (direction * offset);
+                return new Rectangle((int)sensorPos.X - (sensorSize / 2),
+                    (int)sensorPos.Y - (sensorSize / 2), sensorSize,
+                    sensorSize);
+            }
+        }
+
         private void SnapTo(
-            Tile newTile, 
-            Tile anchor, 
+            Tile newTile,
+            Tile anchor,
             bool isHead,
             bool mustFlip)
         {
             int tileHeight = Atlas.Height / Rows;
-            float distance = tileHeight + TilePadding;
+            int tileWidth = Atlas.Width / Cols;
+            newTile.Rotation = MathHelper.PiOver2;
 
-            Vector2 direction = new Vector2(
-                (float)Math.Sin(anchor.Rotation),
-                -(float)Math.Cos(anchor.Rotation)
-            );
+            Vector2 outDirection;
+            float distance;
 
-            newTile.Position = anchor.Position +
-                (direction * distance * (isHead ? 1f : -1f));
-
-            newTile.Rotation = anchor.Rotation;
-
-            if (mustFlip)
+            if (Math.Abs(anchor.Rotation) < 0.1f)
             {
-                newTile.Rotation += MathHelper.Pi;
+                outDirection = isHead ? new Vector2(-1, 0) : new Vector2(1, 0);
+                distance = (tileWidth / 2f) + (tileHeight / 2f) + TilePadding;
             }
+            else
+            {
+                outDirection = new Vector2(
+                    (float)Math.Cos(anchor.Rotation - MathHelper.PiOver2),
+                    (float)Math.Sin(anchor.Rotation - MathHelper.PiOver2));
+                if (isHead) outDirection *= -1;
+                distance = tileHeight + TilePadding;
+            }
+
+            newTile.Position = anchor.Position + (outDirection * distance);
+            if (mustFlip) newTile.Rotation += MathHelper.Pi;
 
             newTile.LastPosition = newTile.Position;
         }
@@ -275,11 +287,9 @@ namespace Domino.Core.Objects
                     tile.SourceRectangle.Width / 2f,
                     tile.SourceRectangle.Height / 2f);
 
-                Vector2 drawPosition = tile.Position + origin;
-
                 spriteBatch.Draw(
                     texture: Atlas,
-                    position: drawPosition,
+                    position: tile.Position, 
                     sourceRectangle: tile.SourceRectangle,
                     color: Color.White,
                     rotation: tile.Rotation,

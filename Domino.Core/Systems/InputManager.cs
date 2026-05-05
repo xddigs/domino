@@ -1,4 +1,3 @@
-using System;
 using Domino.Core.Objects;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -50,16 +49,12 @@ namespace Domino.Core.Systems
                     const float scaleSpeed = 0.2f;
                     const float lerpSpeed = 0.4f;
                     const float lerpMouse = 0.6f;
-                    
+    
                     selectedTile.Scale = MathHelper.Lerp(
-                        selectedTile.Scale, Math.Max(selectedTile.Scale, 1.5f),
+                        selectedTile.Scale, 1.5f,
                         scaleSpeed);
 
-                    Vector2 targetPos = mousePosition - new Vector2(
-                        (selectedTile.SourceRectangle.Width *
-                         selectedTile.Scale) / 2f,
-                        (selectedTile.SourceRectangle.Height *
-                         selectedTile.Scale) / 2f);
+                    Vector2 targetPos = mousePosition; 
 
                     selectedTile.Position = Vector2.Lerp(
                         selectedTile.Position,

@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 
 namespace Domino.Core.Objects
@@ -16,12 +17,28 @@ namespace Domino.Core.Objects
         public Vector2 Velocity { get; set; }
         public Vector2 LastPosition { get; set; }
         
-        public Rectangle Bounds => 
-            new(
-                (int)Position.X, 
-                (int)Position.Y, 
-                SourceRectangle.Width, 
-                SourceRectangle.Height);
+        public Rectangle Bounds
+        {
+            get
+            {
+                int width = SourceRectangle.Width;
+                int height = SourceRectangle.Height;
+
+                float angle = MathHelper.WrapAngle(Rotation);
+                if (Math.Abs(angle) > 0.5f && Math.Abs(angle) < 2.5f)
+                {
+                    width = SourceRectangle.Height;
+                    height = SourceRectangle.Width;
+                }
+
+                return new Rectangle(
+                    (int)(Position.X - width / 2f),
+                    (int)(Position.Y - height / 2f),
+                    width,
+                    height
+                );
+            }
+        }
 
         public Tile(int upperValue, int lowerValue, Rectangle sourceRect)
         {
