@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Domino.Core.Objects;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -95,9 +94,19 @@ namespace Domino.Core.Systems
                         continue; 
                     }
 
-                    t.Rotation = MathHelper.Lerp(t.Rotation, 0, lerpSpeed);
-                    t.Scale = MathHelper.Lerp(t.Scale, 1.0f, lerpSpeed);
-                    t.Position = Vector2.Lerp(t.Position, t.LastPosition, lerpSpeed);
+                    t.Rotation = MathHelper.Lerp(
+                        t.Rotation, 
+                        0, lerpSpeed);
+                    
+                    t.Scale = MathHelper.Lerp(
+                        t.Scale, 
+                        1.0f, 
+                        lerpSpeed);
+                    
+                    t.Position = Vector2.Lerp(
+                        t.Position, 
+                        t.LastPosition, 
+                        lerpSpeed);
                 }
             }
         }
