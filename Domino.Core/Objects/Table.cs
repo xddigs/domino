@@ -18,13 +18,15 @@ namespace Domino.Core.Objects
             Tiles = [];
             Atlas = atlas;
             this.Populate();
+            this.Shuffle();
+            this.Layout();
         }
 
         public void Populate()
         {
             int tileWidth = Atlas.Width / Cols; 
             int tileHeight = Atlas.Height / Rows;
-            int spacing = 10; // Espacio entre fichas
+            const int spacing = 10;
 
             int count = 0;
             for (int i = 0; i <= 6; i++)
@@ -62,12 +64,68 @@ namespace Domino.Core.Objects
                 (t.UpperValue == val2 && t.LowerValue == val1));
         }
         
+        public void Layout()
+        {
+            if (Atlas == null) return;
+
+            int tileWidth = Atlas.Width / Cols;
+            int tileHeight = Atlas.Height / Rows;
+            
+            const int activeTilesHand = 7;
+            const int totalActiveTiles = 14;
+            const int screenWidth = 1280;
+            const int screenHeight = 720;
+            const int spacing = 15;
+            const int bottomMargin = 40;
+            const int offscreenOffset = 100;
+            const int boneyardX = 60;
+            const int stackOffset = 1;
+
+            float handTotalWidth = (activeTilesHand * 
+                                    (tileWidth + spacing)) - spacing;
+            
+            float handStartX = (screenWidth - handTotalWidth) / 2f;
+            float boneyardCenterY = (screenHeight / 2f) - (tileHeight / 2f);
+
+            for (int i = 0; i < Tiles.Count; i++)
+            {
+                var tile = Tiles[i];
+
+                if (i < activeTilesHand) 
+                {
+                    tile.Position = new Vector2(
+                        handStartX + i * (tileWidth + spacing), 
+                        screenHeight - tileHeight - bottomMargin
+                    );
+                }
+                else if (i < totalActiveTiles) 
+                {
+                    int index = i - activeTilesHand;
+                    tile.Position = new Vector2(
+                        handStartX + index * (tileWidth + spacing), 
+                        -tileHeight - offscreenOffset
+                    );
+                }
+                else 
+                {
+                    int stackIndex = i - totalActiveTiles;
+                    tile.Position = new Vector2(
+                        boneyardX + (stackIndex * stackOffset), 
+                        boneyardCenterY + (stackIndex * stackOffset)
+                    );
+                }
+
+                tile.LastPosition = tile.Position;
+            }
+        }
+        
         public void Shuffle()
         {
             var rng = new Random();
             var shuffled = Tiles.OrderBy(a => rng.Next()).ToList();
             Tiles.Clear();
             Tiles.AddRange(shuffled);
+            Layout();
         }
 
         public void Update(GameTime gameTime)

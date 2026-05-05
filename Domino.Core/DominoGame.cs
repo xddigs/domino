@@ -31,6 +31,9 @@ namespace Domino.Core
         {
             _graphics = new GraphicsDeviceManager(this);
             Services.AddService(_graphics);
+            _graphics.PreferredBackBufferWidth = 1280;
+            _graphics.PreferredBackBufferHeight = 720;
+            _graphics.ApplyChanges();
             IsMouseVisible = true;
             
             Content.RootDirectory = "Content";
