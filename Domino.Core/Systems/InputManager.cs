@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Domino.Core.Objects;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -7,7 +8,7 @@ namespace Domino.Core.Systems
 {
     public class InputManager
     {
-        public Table Table { get; set; }
+        public Table Table { get; }
 
         public InputManager(Table table)
         {
@@ -80,13 +81,23 @@ namespace Domino.Core.Systems
             else
             {
                 const float lerpSpeed = 0.15f;
-                
-                selectedTile = null;
-                foreach (var t in Table.Tiles)
+                if (selectedTile != null)
                 {
+                    Table.TryPlaceTile(selectedTile);
+                    selectedTile = null;
+                }
+                
+                foreach (Tile t in Table.Tiles)
+                {
+                    if (Table.ActiveTiles.Contains(t)) 
+                    {
+                        t.Scale = MathHelper.Lerp(t.Scale, 1.0f, lerpSpeed);
+                        continue; 
+                    }
+
                     t.Rotation = MathHelper.Lerp(t.Rotation, 0, lerpSpeed);
-                    t.Scale = MathHelper.Lerp(t.Scale, Math.Min(1.0f, t.Scale), 
-                        lerpSpeed);
+                    t.Scale = MathHelper.Lerp(t.Scale, 1.0f, lerpSpeed);
+                    t.Position = Vector2.Lerp(t.Position, t.LastPosition, lerpSpeed);
                 }
             }
         }
