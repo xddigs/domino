@@ -220,15 +220,24 @@ namespace Domino.Core.Objects
             int tileWidth = Atlas.Width / Cols;
 
             Vector2 outDirection = GetAnchorDirection(isHead);
+            bool isDouble = newTile.UpperValue == newTile.LowerValue;
+            bool anchorIsDouble = anchor.UpperValue == anchor.LowerValue;
 
             float distance;
-            if (Math.Abs(MathHelper.WrapAngle(anchor.Rotation)) < 0.1f)
+            if (anchorIsDouble)
+            {
                 distance = (tileWidth / 2f) + (tileHeight / 2f) + TilePadding;
+            }
+            else if (isDouble)
+            {
+                distance = (tileHeight / 2f) + (tileWidth / 2f) + TilePadding;
+            }
             else
+            {
                 distance = tileHeight + TilePadding;
+            }
 
             newTile.Position = anchor.Position + (outDirection * distance);
-            bool isDouble = newTile.UpperValue == newTile.LowerValue;
 
             if (isDouble)
             {
@@ -237,7 +246,6 @@ namespace Domino.Core.Objects
             else
             {
                 float baseRotation;
-
                 if (Math.Abs(outDirection.X) > 0.5f)
                 {
                     baseRotation = (outDirection.X < 0)
@@ -249,15 +257,11 @@ namespace Domino.Core.Objects
                     baseRotation = (outDirection.Y < 0) ? 0f : MathHelper.Pi;
                 }
 
-                newTile.Rotation = mustFlip
-                    ? baseRotation + MathHelper.Pi
-                    : baseRotation;
+                newTile.Rotation =
+                    mustFlip ? baseRotation + MathHelper.Pi : baseRotation;
             }
 
             newTile.LastPosition = newTile.Position;
-
-            Console.WriteLine(
-                $@"SNAP: {newTile.Position} | Dir: {outDirection} | Head: {isHead}");
 
             int connectingValue =
                 isHead ? anchor.HeadValue!.Value : anchor.TailValue!.Value;
