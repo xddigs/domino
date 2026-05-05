@@ -1,3 +1,4 @@
+using System;
 using Domino.Core.Objects;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -54,11 +55,9 @@ namespace Domino.Core.Systems
                         selectedTile.Scale, 1.5f,
                         scaleSpeed);
 
-                    Vector2 targetPos = mousePosition; 
-
                     selectedTile.Position = Vector2.Lerp(
                         selectedTile.Position,
-                        targetPos, lerpMouse);
+                        mousePosition, lerpMouse);
 
                     Vector2 delta = selectedTile.Position -
                                     selectedTile.LastPosition;
@@ -75,9 +74,11 @@ namespace Domino.Core.Systems
             else
             {
                 const float lerpSpeed = 0.15f;
+                Tile releasedTile = selectedTile;
                 if (selectedTile != null)
                 {
-                    Table.TryPlaceTile(selectedTile);
+                    Vector2 releaseMousePosition = mousePosition;
+                    Table.TryPlaceTile(selectedTile, releaseMousePosition);
                     selectedTile = null;
                 }
                 
@@ -87,6 +88,11 @@ namespace Domino.Core.Systems
                     {
                         t.Scale = MathHelper.Lerp(t.Scale, 1.0f, lerpSpeed);
                         continue; 
+                    }
+                    
+                    if (selectedTile != null)
+                    {
+                        Console.WriteLine($@"DROP: {selectedTile.Position} vs {mousePosition}");
                     }
 
                     t.Rotation = MathHelper.Lerp(

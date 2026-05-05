@@ -8,34 +8,35 @@ namespace Domino.Core.Objects
         public int UpperValue { get; set; }
         public int LowerValue { get; set; }
         public Rectangle SourceRectangle { get; set; }
-        
+
         public Vector2 Position { get; set; }
         public bool IsDragging { get; set; }
-        
-        public float Rotation { get; set;}
+
+        public float Rotation { get; set; }
         public float Scale { get; set; }
         public Vector2 Velocity { get; set; }
         public Vector2 LastPosition { get; set; }
-        
+
         public Rectangle Bounds
         {
             get
             {
-                int width = SourceRectangle.Width;
-                int height = SourceRectangle.Height;
+                float width = SourceRectangle.Width * Scale;
+                float height = SourceRectangle.Height * Scale;
 
                 float angle = MathHelper.WrapAngle(Rotation);
-                if (Math.Abs(angle) > 0.5f && Math.Abs(angle) < 2.5f)
+
+                if (Math.Abs(angle) > MathHelper.PiOver4 && Math.Abs(angle) <
+                    (MathHelper.Pi - MathHelper.PiOver4))
                 {
-                    width = SourceRectangle.Height;
-                    height = SourceRectangle.Width;
+                    (width, height) = (height, width);
                 }
 
                 return new Rectangle(
                     (int)(Position.X - width / 2f),
                     (int)(Position.Y - height / 2f),
-                    width,
-                    height
+                    (int)width,
+                    (int)height
                 );
             }
         }
