@@ -67,6 +67,7 @@ namespace Domino.Core
                 }
                 else
                 {
+                    _selectedTile.Scale = 1.5f;
                     Vector2 targetPos = mousePosition - new Vector2(
                         _selectedTile.SourceRectangle.Width / 2f, 
                         _selectedTile.SourceRectangle.Height / 2f);
@@ -90,6 +91,7 @@ namespace Domino.Core
                 _selectedTile = null;
                 foreach(var t in Table.Tiles) {
                     t.Rotation = MathHelper.Lerp(t.Rotation, 0, 0.1f);
+                    t.Scale = MathHelper.Lerp(t.Scale, 1, 0.2f);
                 }
             }
 

@@ -92,7 +92,7 @@ namespace Domino.Core.Objects
                     color: Color.White,
                     rotation: tile.Rotation,
                     origin: origin,
-                    scale: 1.0f,
+                    scale: tile.Scale,
                     effects: SpriteEffects.None, 
                     layerDepth: 0f
                 );
