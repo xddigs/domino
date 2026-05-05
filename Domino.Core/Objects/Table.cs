@@ -165,25 +165,18 @@ namespace Domino.Core.Objects
 
         private Rectangle GetSnapSensor(Tile anchor, bool isHead)
         {
-            const int
-                sensorSize = 100;
-            const int offset = 75;
+            const int sensorSize = 80;
+            int tileHeight = Atlas.Height / Rows;
+            float offset = (tileHeight / 2f) + 10;
 
-            Vector2 sensorPos = anchor.Position;
+            Vector2 direction = new Vector2(
+                (float)Math.Sin(anchor.Rotation),
+                -(float)Math.Cos(anchor.Rotation)
+            );
 
-            bool isHorizontal =
-                Math.Abs(anchor.Rotation - MathHelper.PiOver2) < 0.1f ||
-                Math.Abs(anchor.Rotation -
-                         (MathHelper.PiOver2 + MathHelper.Pi)) < 0.1f;
+            if (!isHead) direction *= -1;
 
-            if (isHorizontal)
-            {
-                sensorPos.X += isHead ? -offset : offset;
-            }
-            else
-            {
-                sensorPos.Y += isHead ? -offset : offset;
-            }
+            Vector2 sensorPos = anchor.Position + (direction * offset);
 
             return new Rectangle(
                 (int)sensorPos.X - (sensorSize / 2),
@@ -214,7 +207,10 @@ namespace Domino.Core.Objects
             }
         }
 
-        private bool CanConnect(Tile newTile, Tile anchor, out bool mustFlip)
+        private bool CanConnect(
+            Tile newTile, 
+            Tile anchor, 
+            out bool mustFlip)
         {
             mustFlip = false;
             bool isHead = ActiveTiles.First!.Value == anchor;
@@ -236,37 +232,29 @@ namespace Domino.Core.Objects
         }
 
         private void SnapTo(
-            Tile newTile,
-            Tile anchor,
+            Tile newTile, 
+            Tile anchor, 
             bool isHead,
             bool mustFlip)
         {
-            float direction = isHead ? -1f : 1f;
-            int tileWidth = Atlas.Width / Cols;
             int tileHeight = Atlas.Height / Rows;
+            float distance = tileHeight + TilePadding;
 
-            float offsetX = (tileHeight + TilePadding) * direction;
-            float targetX = anchor.Position.X + offsetX;
-            float targetY = anchor.Position.Y;
+            Vector2 direction = new Vector2(
+                (float)Math.Sin(anchor.Rotation),
+                -(float)Math.Cos(anchor.Rotation)
+            );
 
-            const float margin = 150f;
-            bool needsToTurn = targetX is < margin or >
-                ScreenWidth - margin;
+            newTile.Position = anchor.Position +
+                (direction * distance * (isHead ? 1f : -1f));
 
-            if (needsToTurn)
+            newTile.Rotation = anchor.Rotation;
+
+            if (mustFlip)
             {
-                targetX = anchor.Position.X;
-                targetY = anchor.Position.Y + (tileHeight + TilePadding);
-                newTile.Rotation = 0f;
-            }
-            else
-            {
-                newTile.Rotation = MathHelper.PiOver2;
+                newTile.Rotation += MathHelper.Pi;
             }
 
-            if (mustFlip) newTile.Rotation += MathHelper.Pi;
-
-            newTile.Position = new Vector2(targetX, targetY);
             newTile.LastPosition = newTile.Position;
         }
 
