@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <PublishReadyToRun>false</PublishReadyToRun>
+        <TieredCompilation>false</TieredCompilation>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <ApplicationIcon>../Domino.Core/Content/Icon.ico</ApplicationIcon>
+        <AssemblyName>Domino</AssemblyName>
+    </PropertyGroup>
+    <ItemGroup>
+        <MonoGameContentReference Include="..\Domino.Core\Content\Domino.mgcb">
+            <Link>Content\Domino.mgcb</Link>
+        </MonoGameContentReference>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Domino.Core\Domino.Core.csproj"/>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*"/>
+        <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*"/>
+    </ItemGroup>
+</Project>

@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domino.Android", "Domino.Android\Domino.Android.csproj", "{A52C52B9-13BE-403A-A100-D5B992222F8D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domino.Core", "Domino.Core\Domino.Core.csproj", "{49BEC25A-01BD-4678-841C-72CD52213556}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domino.DesktopGL", "Domino.DesktopGL\Domino.DesktopGL.csproj", "{17DD190B-6158-4AF4-B6F4-58734E0BFE12}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domino.iOS", "Domino.iOS\Domino.iOS.csproj", "{64705213-86EC-467A-863A-05EB0EB90D85}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A52C52B9-13BE-403A-A100-D5B992222F8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A52C52B9-13BE-403A-A100-D5B992222F8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A52C52B9-13BE-403A-A100-D5B992222F8D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{A52C52B9-13BE-403A-A100-D5B992222F8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A52C52B9-13BE-403A-A100-D5B992222F8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A52C52B9-13BE-403A-A100-D5B992222F8D}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{49BEC25A-01BD-4678-841C-72CD52213556}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49BEC25A-01BD-4678-841C-72CD52213556}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49BEC25A-01BD-4678-841C-72CD52213556}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49BEC25A-01BD-4678-841C-72CD52213556}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17DD190B-6158-4AF4-B6F4-58734E0BFE12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17DD190B-6158-4AF4-B6F4-58734E0BFE12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17DD190B-6158-4AF4-B6F4-58734E0BFE12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17DD190B-6158-4AF4-B6F4-58734E0BFE12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64705213-86EC-467A-863A-05EB0EB90D85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64705213-86EC-467A-863A-05EB0EB90D85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64705213-86EC-467A-863A-05EB0EB90D85}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{64705213-86EC-467A-863A-05EB0EB90D85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64705213-86EC-467A-863A-05EB0EB90D85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64705213-86EC-467A-863A-05EB0EB90D85}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
