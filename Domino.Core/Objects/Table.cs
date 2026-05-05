@@ -119,7 +119,7 @@ namespace Domino.Core.Objects
         }
 
         public void UpdateGhost(
-            Tile draggingTile, 
+            Tile draggingTile,
             Vector2 mousePosition)
         {
             _showGhost = false;
@@ -188,7 +188,6 @@ namespace Domino.Core.Objects
             }
 
             Tile head = ActiveTiles.First!.Value;
-            Console.WriteLine($@"HEAD: {head.UpperValue}|{head.LowerValue}");
 
             float distHead = Vector2.Distance(dropPosition, head.Position);
             if (distHead < SnapThreshold)
@@ -212,7 +211,6 @@ namespace Domino.Core.Objects
             }
 
             Tile tail = ActiveTiles.Last!.Value;
-            Console.WriteLine($@"TAIL: {tail.UpperValue}|{tail.LowerValue}");
 
             float distTail = Vector2.Distance(dropPosition, tail.Position);
             if (distTail < SnapThreshold)
@@ -344,14 +342,16 @@ namespace Domino.Core.Objects
             Layout();
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch, Tile selectedTile)
         {
             foreach (var tile in Tiles)
             {
+                if (tile == selectedTile) continue;
+
                 Vector2 origin = new Vector2(
                     tile.SourceRectangle.Width / 2f,
                     tile.SourceRectangle.Height / 2f);
-                
+
                 spriteBatch.Draw(
                     texture: Atlas,
                     position: tile.Position,
@@ -364,13 +364,13 @@ namespace Domino.Core.Objects
                     layerDepth: 0f
                 );
             }
-            
+
             if (_showGhost && _ghostTile != null)
             {
                 Vector2 ghostOrigin = new Vector2(
                     _ghostTile.SourceRectangle.Width / 2f,
                     _ghostTile.SourceRectangle.Height / 2f);
-                
+
                 spriteBatch.Draw(
                     texture: Atlas,
                     position: _ghostPosition,
@@ -381,6 +381,25 @@ namespace Domino.Core.Objects
                     scale: 1.0f,
                     effects: SpriteEffects.None,
                     layerDepth: 0.1f
+                );
+            }
+
+            if (selectedTile != null)
+            {
+                Vector2 origin = new Vector2(
+                    selectedTile.SourceRectangle.Width / 2f,
+                    selectedTile.SourceRectangle.Height / 2f);
+                
+                spriteBatch.Draw(
+                    texture: Atlas, 
+                    position: selectedTile.Position,
+                    sourceRectangle: selectedTile.SourceRectangle, 
+                    color: Color.White,
+                    selectedTile.Rotation, 
+                    origin: origin, 
+                    scale: selectedTile.Scale,
+                    effects: SpriteEffects.None, 
+                    layerDepth: 0.2f
                 );
             }
         }

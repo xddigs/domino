@@ -73,7 +73,7 @@ namespace Domino.Core
                 depthStencilState: DepthStencilState.None,
                 rasterizerState: RasterizerState.CullCounterClockwise
             );
-            Table.Draw(spriteBatch: _spriteBatch);   
+            Table.Draw(spriteBatch: _spriteBatch, selectedTile: _selectedTile);   
             _spriteBatch.End();
             base.Draw(gameTime);
         }
