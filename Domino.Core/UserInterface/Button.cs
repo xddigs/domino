@@ -19,9 +19,10 @@ namespace Domino.Core.UserInterface
         private float _targetScale = 1f;
         private const float BaseScale = 1f;
 
-        public Button(Vector2 position, Texture2D spriteSheet)
+        public Button(Vector2 position, Action action, Texture2D spriteSheet)
         {
             Position = position;
+            OnClick = action;
             _spriteSheet = spriteSheet;
             int frameWidth = spriteSheet.Width / 2;
             int frameHeight = spriteSheet.Height;
