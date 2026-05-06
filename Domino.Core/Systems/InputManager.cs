@@ -23,14 +23,13 @@ namespace Domino.Core.Systems
         public void Update(DominoGame game, ref Tile selectedTile,
             GameTime gameTime)
         {
-            var currentMouseState = Mouse.GetState();
-            var currentKeyboardState = Keyboard.GetState();
-            MousePosition = new Vector2(currentMouseState.X, 
-                currentMouseState.Y);
+            var mState = Mouse.GetState();
+            var kState = Keyboard.GetState();
+            MousePosition = new Vector2(mState.X, 
+                mState.Y);
 
-            bool isLeftPressed =
-                currentMouseState.LeftButton == ButtonState.Pressed;
-            if (currentKeyboardState.IsKeyDown(Keys.Escape)) game.Exit();
+            bool isLeftPressed = mState.LeftButton == ButtonState.Pressed;
+            if (kState.IsKeyDown(Keys.Escape)) game.Exit();
 
             if (isLeftPressed)
             {
@@ -111,7 +110,7 @@ namespace Domino.Core.Systems
             }
 
             LastMousePosition = MousePosition;
-            PreviousMouseState = currentMouseState;
+            PreviousMouseState = mState;
         }
     }
 }

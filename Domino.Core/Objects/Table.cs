@@ -352,7 +352,6 @@ namespace Domino.Core.Objects
                 tileToRob.Owner = newOwner;
                 Layout();
                 tileToRob.Position = inBoneyard;
-                tileToRob.Scale = 0.5f; 
             }
         }
 

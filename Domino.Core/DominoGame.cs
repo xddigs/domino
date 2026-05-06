@@ -69,6 +69,8 @@ namespace Domino.Core
         {
             var currentMouseState = Mouse.GetState();
             _background.Update(gameTime);
+
+            bool wasMousePressed = Input.IsMousePressed;
             Input.Update(
                 game: this,
                 selectedTile: ref _selectedTile,
@@ -77,7 +79,7 @@ namespace Domino.Core
             Interface.Update(
                 gameTime: gameTime, 
                 mousePosition: Input.MousePosition, 
-                mouseJustClicked: Input.IsMousePressed);
+                mouseJustClicked: wasMousePressed);
             Input.PreviousMouseState = currentMouseState;
             base.Update(gameTime);
         }
