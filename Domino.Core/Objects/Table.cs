@@ -15,14 +15,14 @@ namespace Domino.Core.Objects
         public Texture2D Atlas { get; }
         public Texture2D BackTile { get; }
         public Tile StartingTile { get; private set; }
-        
+
         public Turn Turn { get; set; }
-        
+
         private Vector2 _currentHeadDir = new(-1, 0);
         private Vector2 _currentTailDir = new(1, 0);
         private int _headRowCount;
         private int _tailRowCount;
-        
+
         private Tile _ghostTile;
         private Vector2 _ghostPosition;
         private float _ghostRotation;
@@ -53,10 +53,10 @@ namespace Domino.Core.Objects
             Shuffle();
             Layout();
             Deal();
-            
-            foreach (var t in Tiles) 
+
+            foreach (var t in Tiles)
                 t.Position = t.LastPosition;
-            
+
             FirstTurn();
         }
 
@@ -65,7 +65,7 @@ namespace Domino.Core.Objects
             IsGameOver = false;
             Tiles.Clear();
             ActiveTiles.Clear();
-    
+
             _headRowCount = 0;
             _tailRowCount = 0;
             _currentHeadDir = new Vector2(-1, 0);
@@ -76,9 +76,9 @@ namespace Domino.Core.Objects
             Shuffle();
             Layout();
             Deal();
-            FirstTurn(); 
+            FirstTurn();
         }
-        
+
         public void Populate()
         {
             int tileWidth = Atlas.Width / Cols;
@@ -104,7 +104,7 @@ namespace Domino.Core.Objects
                 }
             }
         }
-        
+
         public void Layout()
         {
             if (Atlas == null) return;
@@ -114,7 +114,8 @@ namespace Domino.Core.Objects
             Vector2 centerOffset =
                 new Vector2(scaledWidth / 2f, scaledHeight / 2f);
 
-            var playerTiles = Tiles.Where(t => t.Owner == Tile.TileOwner.Player)
+            var playerTiles = Tiles
+                .Where(t => t.Owner == Tile.TileOwner.Player)
                 .ToList();
             float playerHandWidth =
                 (playerTiles.Count * (scaledWidth + Spacing)) - Spacing;
@@ -123,14 +124,17 @@ namespace Domino.Core.Objects
             for (int i = 0; i < playerTiles.Count; i++)
             {
                 playerTiles[i].LastPosition = new Vector2(
-                    playerStartX + i * (scaledWidth + Spacing),
-                    ScreenHeight - scaledHeight - BottomMargin) + centerOffset;
+                                                  playerStartX +
+                                                  i * (scaledWidth + Spacing),
+                                                  ScreenHeight - scaledHeight -
+                                                  BottomMargin)
+                                              + centerOffset;
             }
 
-            var aiTiles = Tiles.Where(
-                t => t.Owner == Tile.TileOwner.Machine).ToList();
-            
-            float aiHandWidth = (aiTiles.Count * 
+            var aiTiles = Tiles.Where(t => t.Owner == Tile.TileOwner.Machine)
+                .ToList();
+
+            float aiHandWidth = (aiTiles.Count *
                                  (scaledWidth + Spacing)) - Spacing;
             float aiStartX = (ScreenWidth - aiHandWidth) / 2f;
 
@@ -142,8 +146,8 @@ namespace Domino.Core.Objects
                 ) + centerOffset;
             }
 
-            var boneyardTiles = Tiles.Where(
-                t => t.Owner == Tile.TileOwner.Boneyard).ToList();
+            var boneyardTiles = Tiles
+                .Where(t => t.Owner == Tile.TileOwner.Boneyard).ToList();
             float boneyardCenterY = 100 - (scaledHeight / 2f);
 
             for (int i = 0; i < boneyardTiles.Count; i++)
@@ -154,7 +158,7 @@ namespace Domino.Core.Objects
                 ) + centerOffset;
             }
         }
-        
+
         public void Deal()
         {
             for (int i = 0; i < 7; i++)
@@ -170,8 +174,8 @@ namespace Domino.Core.Objects
 
         public bool GameStatus()
         {
-            if (CheckWin(Tile.TileOwner.Player) || 
-                CheckWin(Tile.TileOwner.Machine) || 
+            if (CheckWin(Tile.TileOwner.Player) ||
+                CheckWin(Tile.TileOwner.Machine) ||
                 IsGameBlocked())
             {
                 IsGameOver = true;
@@ -180,41 +184,76 @@ namespace Domino.Core.Objects
 
             return false;
         }
-        
+
         public Turn SwitchTurn()
         {
             return Turn == Turn.Machine
-                ? Turn.Player : Turn.Machine;
+                ? Turn.Player
+                : Turn.Machine;
         }
-        
+
         public void FirstTurn()
         {
-            var playerDoubles = Tiles.Where(
-                t => t.Owner == Tile.TileOwner.Player 
-                     && t.UpperValue == t.LowerValue).ToList();
-            
-            var aiDoubles = Tiles.Where(
-                t => t.Owner == Tile.TileOwner.Machine
-                     && t.UpperValue == t.LowerValue).ToList();
+            if (ActiveTiles.Count > 0) return;
 
-            int pMax = playerDoubles.Count != 0 ? playerDoubles.Max(
-                t => t.UpperValue) : -1;
-            int aMax = aiDoubles.Count != 0 ? aiDoubles.Max(
-                t => t.UpperValue) : -1;
+            var playerTiles = Tiles
+                .Where(t => t.Owner == Tile.TileOwner.Player)
+                .ToList();
+            var aiTiles = Tiles.Where(t => t.Owner == Tile.TileOwner.Machine)
+                .ToList();
 
-            if (pMax > aMax)
+            if (!playerTiles.Any() || aiTiles.Count == 0) return;
+
+            var playerDoubles = playerTiles
+                .Where(t => t.UpperValue == t.LowerValue).ToList();
+            var aiDoubles = aiTiles.Where(t => t.UpperValue == t.LowerValue)
+                .ToList();
+
+            int pMax = playerDoubles.Any()
+                ? playerDoubles.Max(t => t.UpperValue)
+                : -1;
+            int aMax = aiDoubles.Count != 0
+                ? aiDoubles.Max(t => t.UpperValue)
+                : -1;
+
+            if (pMax != -1 || aMax != -1)
             {
-                Turn = Turn.Player;
-                StartingTile = playerDoubles.First(t => t.UpperValue == pMax);
-            }
-            else if (aMax > pMax)
-            {
-                Turn = Turn.Machine;
-                StartingTile = aiDoubles.First(t => t.UpperValue == aMax);
+                if (pMax > aMax)
+                {
+                    Turn = Turn.Player;
+                    StartingTile =
+                        playerDoubles.First(t => t.UpperValue == pMax);
+                }
+                else
+                {
+                    Turn = Turn.Machine;
+                    StartingTile = aiDoubles.First(t => t.UpperValue == aMax);
+                }
             }
             else
             {
-                Turn = Turn.Player;
+                var pBest = playerTiles
+                    .OrderByDescending(t => t.UpperValue + t.LowerValue)
+                    .FirstOrDefault();
+
+                var aBest = aiTiles
+                    .OrderByDescending(t => t.UpperValue + t.LowerValue)
+                    .FirstOrDefault();
+
+                if (pBest != null && aBest != null)
+                {
+                    if ((pBest.UpperValue + pBest.LowerValue)
+                        >= (aBest.UpperValue + aBest.LowerValue))
+                    {
+                        Turn = Turn.Player;
+                        StartingTile = pBest;
+                    }
+                    else
+                    {
+                        Turn = Turn.Machine;
+                        StartingTile = aBest;
+                    }
+                }
             }
         }
 
@@ -252,10 +291,10 @@ namespace Domino.Core.Objects
                 Vector2 originalLastPos = draggingTile.LastPosition;
 
                 SnapTo(
-                    newTile: draggingTile, 
-                    anchor: anchor, 
-                    isHead: isHead, 
-                    mustFlip: mustFlip, 
+                    newTile: draggingTile,
+                    anchor: anchor,
+                    isHead: isHead,
+                    mustFlip: mustFlip,
                     isPreview: true);
 
                 _ghostPosition = draggingTile.Position;
@@ -273,9 +312,10 @@ namespace Domino.Core.Objects
         {
             if (ActiveTiles.Contains(tile)) return;
             if (IsGameOver) return;
-            
+
             if (ActiveTiles.Count == 0)
             {
+                if (tile != StartingTile) return;
                 tile.Position = new Vector2(
                     x: ScreenWidth / 2f,
                     y: ScreenHeight / 2f);
@@ -318,6 +358,7 @@ namespace Domino.Core.Objects
                     {
                         Turn = SwitchTurn();
                     }
+
                     return;
                 }
             }
@@ -377,91 +418,126 @@ namespace Domino.Core.Objects
             return isHead ? tile.HeadValue!.Value : tile.TailValue!.Value;
         }
 
-        private void SnapTo(Tile newTile, Tile anchor, bool isHead,
-            bool mustFlip, bool isPreview = false)
+        private void SnapTo(
+            Tile newTile,
+            Tile anchor,
+            bool isHead,
+            bool mustFlip,
+            bool isPreview = false)
         {
             int baseWidth = Atlas.Width / Cols;
             int baseHeight = Atlas.Height / Rows;
             float scaledWidth = baseWidth * Tile.MaxScale;
             float scaledHeight = baseHeight * Tile.MaxScale;
 
-            Vector2 outDirection = isHead ? _currentHeadDir : _currentTailDir;
+            Vector2 outDir = isHead ? _currentHeadDir : _currentTailDir;
             int currentCount = isHead ? _headRowCount : _tailRowCount;
-            
             bool isDouble = newTile.UpperValue == newTile.LowerValue;
-            bool anchorIsDouble = anchor.UpperValue == anchor.LowerValue;
+            bool isTurning = currentCount >= MaxTilesPerRow;
 
-            bool isTurning = false;
-            if (currentCount >= MaxTilesPerRow)
-            {
-                outDirection = new Vector2(0, 1); 
-                isTurning = true;
-            }
+            Vector2 moveDir = isTurning ? new Vector2(0, 1) : outDir;
 
-            float distance = (anchorIsDouble || isDouble || isTurning) 
-                ? (scaledWidth / 2f) + (scaledHeight / 2f) + TilePadding
-                : scaledHeight + TilePadding;
+            bool anchorHorizontal = Math.Abs(
+                anchor.Rotation % MathHelper.Pi) < 0.1f;
 
-            newTile.Position = anchor.Position + (outDirection * distance);
+            bool newHorizontal = !(isTurning || isDouble);
 
-            if (isDouble && !isTurning)
+            float anchorExtent = GetExtentInDirection(
+                rotation: anchor.Rotation, 
+                dir: moveDir,
+                width: scaledWidth, 
+                height: scaledHeight);
+            float newExtent = GetExtentInDirection(
+                rotation: (isTurning || isDouble) ? 0f : (mustFlip
+                        ? (float)Math.Atan2(outDir.Y, outDir.X) -
+                        MathHelper.PiOver2 + MathHelper.Pi
+                        : (float)Math.Atan2(outDir.Y, outDir.X) -
+                          MathHelper.PiOver2),
+                dir: moveDir,
+                width: scaledWidth,
+                height: scaledHeight
+            );
+
+            float distance = anchorExtent + newExtent + TilePadding;
+
+            newTile.Position = anchor.Position + moveDir * distance;
+            if (isTurning || isDouble)
             {
                 newTile.Rotation = 0f;
             }
             else
             {
-                float baseRotation = (Math.Abs(outDirection.X) > 0.5f)
-                    ? (outDirection.X < 0 ? MathHelper.PiOver2 : 
-                        -MathHelper.PiOver2)
-                    : MathHelper.PiOver2;
-
-                newTile.Rotation = mustFlip ? 
-                    baseRotation + MathHelper.Pi : baseRotation;
+                float baseRot = (float)Math.Atan2(outDir.Y, outDir.X) -
+                                MathHelper.PiOver2;
+                newTile.Rotation =
+                    mustFlip ? baseRot + MathHelper.Pi : baseRot;
             }
 
             if (!isPreview)
             {
                 if (isTurning)
                 {
-                    if (isHead) {
+                    if (isHead)
+                    {
                         _headRowCount = 0;
-                        _currentHeadDir.X *= -1; 
-                    } else {
+                        _currentHeadDir.X *= -1;
+                    }
+                    else
+                    {
                         _tailRowCount = 0;
                         _currentTailDir.X *= -1;
                     }
                 }
                 else
                 {
-                    if (isHead) _headRowCount++; else _tailRowCount++;
+                    if (isHead) _headRowCount++;
+                    else _tailRowCount++;
                 }
             }
 
             newTile.LastPosition = newTile.Position;
-
-            int connectingValue =
-                isHead ? anchor.HeadValue!.Value : anchor.TailValue!.Value;
-
+            int connVal = isHead
+                ? anchor.HeadValue!.Value
+                : anchor.TailValue!.Value;
             if (isHead)
             {
-                newTile.HeadValue = (newTile.UpperValue == connectingValue)
+                newTile.HeadValue = (newTile.UpperValue == connVal)
                     ? newTile.LowerValue
                     : newTile.UpperValue;
-                newTile.TailValue = connectingValue;
+                newTile.TailValue = connVal;
             }
             else
             {
-                newTile.TailValue = (newTile.UpperValue == connectingValue)
+                newTile.TailValue = (newTile.UpperValue == connVal)
                     ? newTile.LowerValue
                     : newTile.UpperValue;
-                newTile.HeadValue = connectingValue;
+                newTile.HeadValue = connVal;
             }
+        }
+
+        private float GetExtentInDirection(
+            float rotation, 
+            Vector2 dir,
+            float width,
+            float height)
+        {
+            Vector2 right = new Vector2((float)Math.Cos(rotation),
+                (float)Math.Sin(rotation));
+            Vector2 up = new Vector2(-right.Y, right.X);
+
+            float projRight = Math.Abs(Vector2.Dot(
+                right, dir)) * (width / 2f);
+            float projUp = Math.Abs(
+                Vector2.Dot(up, dir)) * (height / 2f);
+
+            return projRight + projUp;
         }
 
         public void Rob(Tile.TileOwner newOwner)
         {
-            var tileToRob = Tiles.LastOrDefault(
-                t => t.Owner == Tile.TileOwner.Boneyard);
+            var tileToRob =
+                Tiles.LastOrDefault(
+                    t => t.Owner == Tile.TileOwner.Boneyard);
 
             if (tileToRob != null)
             {
@@ -469,6 +545,8 @@ namespace Domino.Core.Objects
                 tileToRob.Owner = newOwner;
                 Layout();
                 tileToRob.Position = inBoneyard;
+
+                if (ActiveTiles.Count == 0) FirstTurn();
             }
         }
 
@@ -479,54 +557,57 @@ namespace Domino.Core.Objects
             Tiles.AddRange(shuffled);
             Layout();
         }
-        
+
         public bool IsGameBlocked()
         {
-            if (Tiles.Any(t => t.Owner == Tile.TileOwner.Boneyard)) return false;
+            if (Tiles.Any(t => t.Owner == Tile.TileOwner.Boneyard))
+                return false;
 
             int head = ActiveTiles.First!.Value.HeadValue!.Value;
             int tail = ActiveTiles.Last!.Value.TailValue!.Value;
 
-            bool playerCanMove = Tiles.Where(t => t.Owner == Tile.TileOwner.Player)
-                .Any(t => t.UpperValue == head || t.LowerValue == head || 
+            bool playerCanMove = Tiles
+                .Where(t => t.Owner == Tile.TileOwner.Player)
+                .Any(t => t.UpperValue == head || t.LowerValue == head ||
                           t.UpperValue == tail || t.LowerValue == tail);
-    
-            bool aiCanMove = Tiles.Where(t => t.Owner == Tile.TileOwner.Machine)
-                .Any(t => t.UpperValue == head || t.LowerValue == head || 
+
+            bool aiCanMove = Tiles
+                .Where(t => t.Owner == Tile.TileOwner.Machine)
+                .Any(t => t.UpperValue == head || t.LowerValue == head ||
                           t.UpperValue == tail || t.LowerValue == tail);
 
             return !playerCanMove && !aiCanMove;
         }
-        
+
         public bool CheckWin(Tile.TileOwner owner)
         {
             return Tiles.All(t => t.Owner != owner);
         }
-        
+
         public int CalculateScore(Tile.TileOwner owner)
         {
             return Tiles.Where(t => t.Owner == owner)
                 .Sum(t => t.UpperValue + t.LowerValue);
         }
-        
+
         public void Draw(SpriteBatch spriteBatch, Tile selectedTile)
         {
             foreach (var tile in Tiles)
             {
                 if (tile == selectedTile) continue;
 
-                bool isFaceUp = tile.Owner is Tile.TileOwner.Player 
+                bool isFaceUp = tile.Owner is Tile.TileOwner.Player
                     or Tile.TileOwner.Board;
-    
+
                 Texture2D texture = isFaceUp ? Atlas : BackTile;
                 Rectangle? source = isFaceUp ? tile.SourceRectangle : null;
 
-                Vector2 origin = isFaceUp 
+                Vector2 origin = isFaceUp
                     ? new Vector2(
-                        x: tile.SourceRectangle.Width / 2f, 
+                        x: tile.SourceRectangle.Width / 2f,
                         y: tile.SourceRectangle.Height / 2f)
                     : new Vector2(
-                        x: BackTile.Width / 2f, 
+                        x: BackTile.Width / 2f,
                         y: BackTile.Height / 2f);
 
                 spriteBatch.Draw(

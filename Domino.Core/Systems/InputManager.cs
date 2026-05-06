@@ -29,8 +29,7 @@ namespace Domino.Core.Systems
 
             if (kState.IsKeyDown(Keys.Escape)) game.Exit();
             
-            if (kState.IsKeyDown(Keys.R) && (Table.IsGameOver || 
-                Table.IsGameBlocked()))
+            if (kState.IsKeyDown(Keys.R) && Table.IsGameOver)
             {
                 Table.Reboot();
             }
