@@ -29,19 +29,6 @@ namespace Domino.Core.Objects
         private bool _showGhost;
         public bool IsGameOver { get; private set; }
 
-        private const int Cols = 7;
-        private const int Rows = 4;
-        private const int ScreenWidth = 1280;
-        private const int ScreenHeight = 720;
-        private const int BottomMargin = 40;
-        private const int OponentHandOffset = -150;
-        private const int BoneyardX = 60;
-        private const int StackOffset = 1;
-        private const int TilePadding = -4;
-        private const int Spacing = 20;
-        private const float SnapThreshold = 100f;
-        private const int MaxTilesPerRow = 4;
-
         public Table(Texture2D atlas, Texture2D backTile)
         {
             Tiles = [];
@@ -81,16 +68,16 @@ namespace Domino.Core.Objects
 
         public void Populate()
         {
-            int tileWidth = Atlas.Width / Cols;
-            int tileHeight = Atlas.Height / Rows;
+            int tileWidth = Atlas.Width / Constants.Cols;
+            int tileHeight = Atlas.Height / Constants.Rows;
 
             int count = 0;
             for (int i = 0; i <= 6; i++)
             {
                 for (int j = i; j <= 6; j++)
                 {
-                    int column = count % Cols;
-                    int row = count / Cols;
+                    int column = count % Constants.Cols;
+                    int row = count / Constants.Cols;
 
                     Rectangle sourceRect = new Rectangle(
                         column * tileWidth,
@@ -109,8 +96,9 @@ namespace Domino.Core.Objects
         {
             if (Atlas == null) return;
 
-            float scaledWidth = (Atlas.Width / Cols) * Tile.MaxScale;
-            float scaledHeight = (Atlas.Height / Rows) * Tile.MaxScale;
+            float scaledWidth = (Atlas.Width / Constants.Cols) * Tile.MaxScale;
+            float scaledHeight =
+                (Atlas.Height / Constants.Rows) * Tile.MaxScale;
             Vector2 centerOffset =
                 new Vector2(scaledWidth / 2f, scaledHeight / 2f);
 
@@ -118,16 +106,20 @@ namespace Domino.Core.Objects
                 .Where(t => t.Owner == Tile.TileOwner.Player)
                 .ToList();
             float playerHandWidth =
-                (playerTiles.Count * (scaledWidth + Spacing)) - Spacing;
-            float playerStartX = (ScreenWidth - playerHandWidth) / 2f;
+                (playerTiles.Count * (scaledWidth +
+                                      Constants.Spacing)) - Constants.Spacing;
+            float playerStartX =
+                (Constants.ScreenWidth - playerHandWidth) / 2f;
 
             for (int i = 0; i < playerTiles.Count; i++)
             {
                 playerTiles[i].LastPosition = new Vector2(
                                                   playerStartX +
-                                                  i * (scaledWidth + Spacing),
-                                                  ScreenHeight - scaledHeight -
-                                                  BottomMargin)
+                                                  i * (scaledWidth +
+                                                      Constants.Spacing),
+                                                  Constants.ScreenHeight -
+                                                  scaledHeight -
+                                                  Constants.BottomMargin)
                                               + centerOffset;
             }
 
@@ -135,14 +127,15 @@ namespace Domino.Core.Objects
                 .ToList();
 
             float aiHandWidth = (aiTiles.Count *
-                                 (scaledWidth + Spacing)) - Spacing;
-            float aiStartX = (ScreenWidth - aiHandWidth) / 2f;
+                                 (scaledWidth + Constants.Spacing)) -
+                                Constants.Spacing;
+            float aiStartX = (Constants.ScreenWidth - aiHandWidth) / 2f;
 
             for (int i = 0; i < aiTiles.Count; i++)
             {
                 aiTiles[i].LastPosition = new Vector2(
-                    aiStartX + i * (scaledWidth + Spacing),
-                    -scaledHeight - OponentHandOffset
+                    aiStartX + i * (scaledWidth + Constants.Spacing),
+                    -scaledHeight - Constants.OponentHandOffset
                 ) + centerOffset;
             }
 
@@ -153,8 +146,8 @@ namespace Domino.Core.Objects
             for (int i = 0; i < boneyardTiles.Count; i++)
             {
                 boneyardTiles[i].LastPosition = new Vector2(
-                    BoneyardX + (i * StackOffset),
-                    boneyardCenterY + (i * StackOffset)
+                    Constants.BoneyardX + (i * Constants.StackOffset),
+                    boneyardCenterY + (i * Constants.StackOffset)
                 ) + centerOffset;
             }
         }
@@ -271,12 +264,12 @@ namespace Domino.Core.Objects
             Tile anchor = null;
             bool isHead = false;
 
-            if (distHead < SnapThreshold)
+            if (distHead < Constants.SnapThreshold)
             {
                 anchor = head;
                 isHead = true;
             }
-            else if (distTail < SnapThreshold)
+            else if (distTail < Constants.SnapThreshold)
             {
                 anchor = tail;
             }
@@ -317,8 +310,8 @@ namespace Domino.Core.Objects
             {
                 if (tile != StartingTile) return;
                 tile.Position = new Vector2(
-                    x: ScreenWidth / 2f,
-                    y: ScreenHeight / 2f);
+                    x: Constants.ScreenWidth / 2f,
+                    y: Constants.ScreenHeight / 2f);
                 tile.Rotation = 0f;
                 tile.LastPosition = tile.Position;
                 tile.HeadValue = tile.UpperValue;
@@ -337,7 +330,7 @@ namespace Domino.Core.Objects
             Tile head = ActiveTiles.First!.Value;
 
             float distHead = Vector2.Distance(dropPosition, head.Position);
-            if (distHead < SnapThreshold)
+            if (distHead < Constants.SnapThreshold)
             {
                 if (CanConnect(
                         newTile: tile,
@@ -366,7 +359,7 @@ namespace Domino.Core.Objects
             Tile tail = ActiveTiles.Last!.Value;
 
             float distTail = Vector2.Distance(dropPosition, tail.Position);
-            if (distTail < SnapThreshold)
+            if (distTail < Constants.SnapThreshold)
             {
                 if (CanConnect(
                         newTile: tile,
@@ -425,15 +418,15 @@ namespace Domino.Core.Objects
             bool mustFlip,
             bool isPreview = false)
         {
-            int baseWidth = Atlas.Width / Cols;
-            int baseHeight = Atlas.Height / Rows;
+            int baseWidth = Atlas.Width / Constants.Cols;
+            int baseHeight = Atlas.Height / Constants.Rows;
             float scaledWidth = baseWidth * Tile.MaxScale;
             float scaledHeight = baseHeight * Tile.MaxScale;
 
             Vector2 outDir = isHead ? _currentHeadDir : _currentTailDir;
             int currentCount = isHead ? _headRowCount : _tailRowCount;
             bool isDouble = newTile.UpperValue == newTile.LowerValue;
-            bool isTurning = currentCount >= MaxTilesPerRow;
+            bool isTurning = currentCount >= Constants.MaxTilesPerRow;
 
             Vector2 moveDir = isTurning ? new Vector2(0, 1) : outDir;
 
@@ -443,12 +436,14 @@ namespace Domino.Core.Objects
             bool newHorizontal = !(isTurning || isDouble);
 
             float anchorExtent = GetExtentInDirection(
-                rotation: anchor.Rotation, 
+                rotation: anchor.Rotation,
                 dir: moveDir,
-                width: scaledWidth, 
+                width: scaledWidth,
                 height: scaledHeight);
             float newExtent = GetExtentInDirection(
-                rotation: (isTurning || isDouble) ? 0f : (mustFlip
+                rotation: (isTurning || isDouble)
+                    ? 0f
+                    : (mustFlip
                         ? (float)Math.Atan2(outDir.Y, outDir.X) -
                         MathHelper.PiOver2 + MathHelper.Pi
                         : (float)Math.Atan2(outDir.Y, outDir.X) -
@@ -458,7 +453,7 @@ namespace Domino.Core.Objects
                 height: scaledHeight
             );
 
-            float distance = anchorExtent + newExtent + TilePadding;
+            float distance = anchorExtent + newExtent + Constants.TilePadding;
 
             newTile.Position = anchor.Position + moveDir * distance;
             if (isTurning || isDouble)
@@ -516,7 +511,7 @@ namespace Domino.Core.Objects
         }
 
         private float GetExtentInDirection(
-            float rotation, 
+            float rotation,
             Vector2 dir,
             float width,
             float height)
@@ -536,8 +531,7 @@ namespace Domino.Core.Objects
         public void Rob(Tile.TileOwner newOwner)
         {
             var tileToRob =
-                Tiles.LastOrDefault(
-                    t => t.Owner == Tile.TileOwner.Boneyard);
+                Tiles.LastOrDefault(t => t.Owner == Tile.TileOwner.Boneyard);
 
             if (tileToRob != null)
             {
