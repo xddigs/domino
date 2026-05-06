@@ -4,6 +4,7 @@ using Domino.Core.Systems;
 using Domino.Core.UserInterface;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace Domino.Core
 {
@@ -55,7 +56,7 @@ namespace Domino.Core
             
             Table = new Table(atlas: Atlas);
             Input = new InputManager(table: Table);
-            Interface = new Interface(buttonTexture: Button);
+            Interface = new Interface(table: Table, buttonTexture: Button);
             _background = new Background(GraphicsDevice);
             
             _selectedTile = null;
@@ -64,12 +65,15 @@ namespace Domino.Core
 
         protected override void Update(GameTime gameTime)
         {
+            var currentMouseState = Mouse.GetState();
             _background.Update(gameTime);
             Input.Update(
                 game: this,
                 selectedTile: ref _selectedTile,
                 gameTime: gameTime);
-
+            
+            Interface.Update(gameTime, Input.MousePosition, Input.IsMousePressed);
+            Input.PreviousMouseState = currentMouseState;
             base.Update(gameTime);
         }
 

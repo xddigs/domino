@@ -8,6 +8,7 @@ namespace Domino.Core.Objects
 {
     public class Table
     {
+        private static readonly Random Rng = new();
         public List<Tile> Tiles { get; }
         public LinkedList<Tile> ActiveTiles { get; }
         public Texture2D Atlas { get; }
@@ -30,7 +31,7 @@ namespace Domino.Core.Objects
         private const int OffscreenOffset = 100;
         private const int BoneyardX = 60;
         private const int StackOffset = 1;
-        private const int TilePadding = -1;
+        private const int TilePadding = -4;
         private const int Spacing = 20;
         private const float SnapThreshold = 100f;
 
@@ -321,10 +322,18 @@ namespace Domino.Core.Objects
             }
         }
 
+        public void Rob()
+        {
+            if (ActiveTiles.Count <= 1) return;
+            foreach (Tile tile in Tiles)
+            {
+                // TODO
+            }
+        }
+        
         public void Shuffle()
         {
-            var rng = new Random();
-            var shuffled = Tiles.OrderBy(a => rng.Next()).ToList();
+            var shuffled = Tiles.OrderBy(a => Rng.Next()).ToList();
             Tiles.Clear();
             Tiles.AddRange(shuffled);
             Layout();

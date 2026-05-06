@@ -7,7 +7,12 @@ namespace Domino.Core.Systems
     public class InputManager
     {
         public Table Table { get; }
-        private Vector2 _lastMousePosition;
+        public Vector2 LastMousePosition { get; set; }
+        public Vector2 MousePosition { get; set; }
+        public MouseState PreviousMouseState { get; set; }
+        public bool IsMousePressed =>
+            Mouse.GetState().LeftButton == ButtonState.Pressed && 
+            PreviousMouseState.LeftButton == ButtonState.Released;
 
         public InputManager(Table table)
         {
@@ -22,7 +27,7 @@ namespace Domino.Core.Systems
             var currentMouseState = Mouse.GetState();
             var currentKeyboardState = Keyboard.GetState();
 
-            Vector2 mousePosition = new Vector2(
+            MousePosition = new Vector2(
                 currentMouseState.X, currentMouseState.Y);
 
             bool isLeftPressed = currentMouseState.LeftButton ==
@@ -38,7 +43,7 @@ namespace Domino.Core.Systems
                     {
                         Tile currentTile = Table.Tiles[i];
                         if (!Table.ActiveTiles.Contains(currentTile) 
-                            && currentTile.Bounds.Contains(mousePosition))
+                            && currentTile.Bounds.Contains(MousePosition))
                         {
                             selectedTile = currentTile;
                             break;
@@ -52,7 +57,7 @@ namespace Domino.Core.Systems
                     const float lerpSpeed = 0.4f;
                     const float lerpMouse = 0.6f;
                     
-                    Vector2 mouseDelta = mousePosition - _lastMousePosition;
+                    Vector2 mouseDelta = MousePosition - LastMousePosition;
                     selectedTile.Scale = MathHelper.Lerp(
                         selectedTile.Scale, 
                         Tile.MaxScale * 1.3f,
@@ -60,7 +65,7 @@ namespace Domino.Core.Systems
 
                     selectedTile.Position = Vector2.Lerp(
                         selectedTile.Position,
-                        mousePosition, lerpMouse);
+                        MousePosition, lerpMouse);
 
                     const float rotationIntensity = 0.02f; 
                     float targetRotation = mouseDelta.X * rotationIntensity;
@@ -71,7 +76,7 @@ namespace Domino.Core.Systems
 
                     Table.UpdateGhost(
                         draggingTile: selectedTile,
-                        mousePosition: mousePosition);
+                        mousePosition: MousePosition);
                 }
             }
             else
@@ -81,7 +86,7 @@ namespace Domino.Core.Systems
                 Tile releasedTile = selectedTile;
                 if (selectedTile != null)
                 {
-                    Vector2 releaseMousePosition = mousePosition;
+                    Vector2 releaseMousePosition = MousePosition;
                     Table.TryPlaceTile(selectedTile, releaseMousePosition);
                     selectedTile = null;
                 }
@@ -112,7 +117,7 @@ namespace Domino.Core.Systems
                         lerpSpeed);
                 }
             }
-            _lastMousePosition = mousePosition;
+            LastMousePosition = MousePosition;
         }
     }
 }
