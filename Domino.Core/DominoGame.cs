@@ -25,8 +25,6 @@ namespace Domino.Core
         public Interface Interface { get; set; }
         public Texture2D Button { get; set; }
         public Machine Machine { get; set; }
-        public int Score { get; set; }
-        public bool IsGameOver { get; set; }
 
         public static readonly bool IsMobile = OperatingSystem.IsAndroid() ||
                                                 OperatingSystem.IsIOS();
