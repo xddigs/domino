@@ -17,8 +17,10 @@ namespace Domino.Core.Objects
         
         public Turn Turn { get; set; }
         
-        private readonly Vector2 _headDirection = new(-1, 0);
-        private readonly Vector2 _tailDirection = new(1, 0);
+        private Vector2 _currentHeadDir = new(-1, 0);
+        private Vector2 _currentTailDir = new(1, 0);
+        private int _headRowCount;
+        private int _tailRowCount;
         
         private Tile _ghostTile;
         private Vector2 _ghostPosition;
@@ -36,6 +38,7 @@ namespace Domino.Core.Objects
         private const int TilePadding = -4;
         private const int Spacing = 20;
         private const float SnapThreshold = 100f;
+        private const int MaxTilesPerRow = 4;
 
         public Table(Texture2D atlas, Texture2D backTile)
         {
@@ -51,6 +54,8 @@ namespace Domino.Core.Objects
             
             foreach (var t in Tiles) 
                 t.Position = t.LastPosition;
+            
+            FirstTurn();
         }
 
         public void Populate()
@@ -201,7 +206,12 @@ namespace Domino.Core.Objects
                 float originalRot = draggingTile.Rotation;
                 Vector2 originalLastPos = draggingTile.LastPosition;
 
-                SnapTo(draggingTile, anchor, isHead, mustFlip);
+                SnapTo(
+                    newTile: draggingTile, 
+                    anchor: anchor, 
+                    isHead: isHead, 
+                    mustFlip: mustFlip, 
+                    isPreview: true);
 
                 _ghostPosition = draggingTile.Position;
                 _ghostRotation = draggingTile.Rotation;
@@ -229,6 +239,10 @@ namespace Domino.Core.Objects
                 tile.TailValue = tile.LowerValue;
                 tile.Owner = Tile.TileOwner.Board;
                 ActiveTiles.AddFirst(tile);
+                _headRowCount = 0;
+                _tailRowCount = 0;
+                _currentHeadDir = new Vector2(-1, 0);
+                _currentTailDir = new Vector2(1, 0);
                 Layout();
                 Turn = SwitchTurn();
                 return;
@@ -314,46 +328,62 @@ namespace Domino.Core.Objects
             return isHead ? tile.HeadValue!.Value : tile.TailValue!.Value;
         }
 
-        private Vector2 GetAnchorDirection(bool isHead)
-        {
-            return isHead ? _headDirection : _tailDirection;
-        }
-
         private void SnapTo(Tile newTile, Tile anchor, bool isHead,
-            bool mustFlip)
+            bool mustFlip, bool isPreview = false)
         {
             int baseWidth = Atlas.Width / Cols;
             int baseHeight = Atlas.Height / Rows;
             float scaledWidth = baseWidth * Tile.MaxScale;
             float scaledHeight = baseHeight * Tile.MaxScale;
 
-            Vector2 outDirection = GetAnchorDirection(isHead);
+            Vector2 outDirection = isHead ? _currentHeadDir : _currentTailDir;
+            int currentCount = isHead ? _headRowCount : _tailRowCount;
+            
             bool isDouble = newTile.UpperValue == newTile.LowerValue;
             bool anchorIsDouble = anchor.UpperValue == anchor.LowerValue;
 
-            float distance;
-            if (anchorIsDouble || isDouble)
-                distance = (scaledWidth / 2f) + (scaledHeight / 2f) +
-                           TilePadding;
-            else
-                distance = scaledHeight + TilePadding;
+            bool isTurning = false;
+            if (currentCount >= MaxTilesPerRow)
+            {
+                outDirection = new Vector2(0, 1); 
+                isTurning = true;
+            }
+
+            float distance = (anchorIsDouble || isDouble || isTurning) 
+                ? (scaledWidth / 2f) + (scaledHeight / 2f) + TilePadding
+                : scaledHeight + TilePadding;
 
             newTile.Position = anchor.Position + (outDirection * distance);
 
-            if (isDouble)
+            if (isDouble && !isTurning)
             {
                 newTile.Rotation = 0f;
             }
             else
             {
                 float baseRotation = (Math.Abs(outDirection.X) > 0.5f)
-                    ? (outDirection.X < 0
-                        ? MathHelper.PiOver2
-                        : -MathHelper.PiOver2)
-                    : (outDirection.Y < 0 ? 0f : MathHelper.Pi);
+                    ? (outDirection.X < 0 ? MathHelper.PiOver2 : -MathHelper.PiOver2)
+                    : MathHelper.PiOver2;
 
-                newTile.Rotation =
-                    mustFlip ? baseRotation + MathHelper.Pi : baseRotation;
+                newTile.Rotation = mustFlip ? baseRotation + MathHelper.Pi : baseRotation;
+            }
+
+            if (!isPreview)
+            {
+                if (isTurning)
+                {
+                    if (isHead) {
+                        _headRowCount = 0;
+                        _currentHeadDir.X *= -1; 
+                    } else {
+                        _tailRowCount = 0;
+                        _currentTailDir.X *= -1;
+                    }
+                }
+                else
+                {
+                    if (isHead) _headRowCount++; else _tailRowCount++;
+                }
             }
 
             newTile.LastPosition = newTile.Position;
