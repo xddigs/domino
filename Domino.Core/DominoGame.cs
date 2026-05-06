@@ -1,6 +1,7 @@
 using System;
 using Domino.Core.Objects;
 using Domino.Core.Systems;
+using Domino.Core.UserInterface;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -17,6 +18,8 @@ namespace Domino.Core
         private Tile _selectedTile;
         
         public InputManager Input { get; set; }
+        public Interface Interface { get; set; }
+        public Texture2D Button { get; set; }
         public Random Random { get; } = new();
         public int Score { get; set; }
         public bool IsGameOver { get; set; }
@@ -48,9 +51,13 @@ namespace Domino.Core
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             Atlas = Content.Load<Texture2D>("Sprites/dominoes");
+            Button = Content.Load<Texture2D>("Interface/button");
+            
             Table = new Table(atlas: Atlas);
             Input = new InputManager(table: Table);
+            Interface = new Interface(buttonTexture: Button);
             _background = new Background(GraphicsDevice);
+            
             _selectedTile = null;
             base.LoadContent();
         }
@@ -86,6 +93,8 @@ namespace Domino.Core
                 spriteBatch: _spriteBatch, 
                 selectedTile: _selectedTile);   
             _spriteBatch.End();
+            
+            Interface.Draw(spriteBatch: _spriteBatch);
             base.Draw(gameTime);
         }
     }
