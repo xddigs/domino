@@ -10,8 +10,9 @@ namespace Domino.Core.Systems
         public Vector2 LastMousePosition { get; set; }
         public Vector2 MousePosition { get; set; }
         public MouseState PreviousMouseState { get; set; }
+
         public bool IsMousePressed =>
-            Mouse.GetState().LeftButton == ButtonState.Pressed && 
+            Mouse.GetState().LeftButton == ButtonState.Pressed &&
             PreviousMouseState.LeftButton == ButtonState.Released;
 
         public InputManager(Table table)
@@ -19,22 +20,18 @@ namespace Domino.Core.Systems
             Table = table;
         }
 
-        public void Update(
-            DominoGame game,
-            ref Tile selectedTile,
+        public void Update(DominoGame game, ref Tile selectedTile,
             GameTime gameTime)
         {
             var currentMouseState = Mouse.GetState();
             var currentKeyboardState = Keyboard.GetState();
+            MousePosition =
+                new Vector2(currentMouseState.X, currentMouseState.Y);
 
-            MousePosition = new Vector2(
-                currentMouseState.X, currentMouseState.Y);
+            bool isLeftPressed =
+                currentMouseState.LeftButton == ButtonState.Pressed;
+            if (currentKeyboardState.IsKeyDown(Keys.Escape)) game.Exit();
 
-            bool isLeftPressed = currentMouseState.LeftButton ==
-                                 ButtonState.Pressed;
-            bool isEscapePressed = currentKeyboardState.IsKeyDown(Keys.Escape);
-
-            if (isEscapePressed) game.Exit();
             if (isLeftPressed)
             {
                 if (selectedTile == null)
@@ -42,82 +39,71 @@ namespace Domino.Core.Systems
                     for (int i = Table.Tiles.Count - 1; i >= 0; i--)
                     {
                         Tile currentTile = Table.Tiles[i];
-                        if (!Table.ActiveTiles.Contains(currentTile) 
+                        if (!Table.ActiveTiles.Contains(currentTile)
                             && currentTile.Bounds.Contains(MousePosition))
                         {
                             selectedTile = currentTile;
+                            selectedTile.Scale = Tile.MaxScale * 0.8f;
                             break;
                         }
                     }
                 }
                 else
                 {
-                    const float rotationSpeed = 0.06f;
-                    const float scaleSpeed = 0.2f;
-                    const float lerpSpeed = 0.4f;
                     const float lerpMouse = 0.6f;
-                    
+                    const float rotationIntensity = 0.02f;
+                    const float lerpSpeed = 0.4f;
+
                     Vector2 mouseDelta = MousePosition - LastMousePosition;
-                    selectedTile.Scale = MathHelper.Lerp(
-                        selectedTile.Scale, 
-                        Tile.MaxScale * 1.3f,
-                        scaleSpeed);
-
-                    selectedTile.Position = Vector2.Lerp(
-                        selectedTile.Position,
+                    selectedTile.Position = Vector2.Lerp(selectedTile.Position,
                         MousePosition, lerpMouse);
-
-                    const float rotationIntensity = 0.02f; 
+                    
                     float targetRotation = mouseDelta.X * rotationIntensity;
-
                     selectedTile.Rotation = MathHelper.Lerp(
-                        selectedTile.Rotation,
-                        targetRotation, lerpSpeed);
+                        selectedTile.Rotation, targetRotation, lerpSpeed);
 
-                    Table.UpdateGhost(
-                        draggingTile: selectedTile,
-                        mousePosition: MousePosition);
+                    Table.UpdateGhost(selectedTile, MousePosition);
                 }
             }
             else
             {
-                const float lerpSpeed = 0.15f;
                 Table.UpdateGhost(null, Vector2.Zero);
-                Tile releasedTile = selectedTile;
                 if (selectedTile != null)
                 {
-                    Vector2 releaseMousePosition = MousePosition;
-                    Table.TryPlaceTile(selectedTile, releaseMousePosition);
+                    Table.TryPlaceTile(selectedTile, MousePosition);
                     selectedTile = null;
                 }
+            }
 
-                foreach (Tile t in Table.Tiles)
+            const float lerpScaleSpeed = 0.15f;
+
+            foreach (Tile t in Table.Tiles)
+            {
+                float targetScale = Tile.MaxScale;
+
+                if (t == selectedTile)
                 {
-                    if (Table.ActiveTiles.Contains(t))
-                    {
-                        t.Scale = MathHelper.Lerp(
-                            t.Scale, 
-                            Tile.MaxScale,
-                            lerpSpeed);
-                        continue;
-                    }
+                    targetScale = Tile.MaxScale * 1.3f;
+                }
+                else if (selectedTile == null &&
+                         !Table.ActiveTiles.Contains(t) &&
+                         t.Bounds.Contains(MousePosition))
+                {
+                    targetScale = Tile.MaxScale * 1.15f;
+                }
 
-                    t.Rotation = MathHelper.Lerp(
-                        t.Rotation,
-                        0, lerpSpeed);
+                t.Scale = MathHelper.Lerp(t.Scale, targetScale, lerpScaleSpeed);
 
-                    t.Scale = MathHelper.Lerp(
-                        t.Scale,
-                        Tile.MaxScale,
-                        lerpSpeed);
-
-                    t.Position = Vector2.Lerp(
-                        t.Position,
-                        t.LastPosition,
-                        lerpSpeed);
+                if (!Table.ActiveTiles.Contains(t) && t != selectedTile)
+                {
+                    t.Position =
+                        Vector2.Lerp(t.Position, t.LastPosition, 0.15f);
+                    t.Rotation = MathHelper.Lerp(t.Rotation, 0, 0.15f);
                 }
             }
+
             LastMousePosition = MousePosition;
+            PreviousMouseState = currentMouseState;
         }
     }
 }
