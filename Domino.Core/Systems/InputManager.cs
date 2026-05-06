@@ -28,7 +28,13 @@ namespace Domino.Core.Systems
             MousePosition = new Vector2(mState.X, mState.Y);
 
             if (kState.IsKeyDown(Keys.Escape)) game.Exit();
-
+            
+            if (kState.IsKeyDown(Keys.R) && (Table.IsGameOver || 
+                Table.IsGameBlocked()))
+            {
+                Table.Reboot();
+            }
+            
             if (Table.Turn == Turn.Player)
             {
                 PlayerInput(ref selectedTile, mState);

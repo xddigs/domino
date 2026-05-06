@@ -26,7 +26,7 @@ namespace Domino.Core.Objects
         private Vector2 _ghostPosition;
         private float _ghostRotation;
         private bool _showGhost;
-        private bool _isGameOver;
+        public bool IsGameOver { get; private set; }
 
         private const int Cols = 7;
         private const int Rows = 4;
@@ -59,6 +59,17 @@ namespace Domino.Core.Objects
             FirstTurn();
         }
 
+        public void Reboot()
+        {
+            IsGameOver = false;
+            Tiles.Clear();
+            ActiveTiles.Clear();
+            Populate();
+            Shuffle();
+            Layout();
+            Deal();
+        }
+        
         public void Populate()
         {
             int tileWidth = Atlas.Width / Cols;
@@ -153,7 +164,7 @@ namespace Domino.Core.Objects
             if (CheckWin(Tile.TileOwner.Player)
                 || CheckWin(Tile.TileOwner.Machine))
             {
-                _isGameOver = true;
+                IsGameOver = true;
                 return true;
             }
 
@@ -163,7 +174,7 @@ namespace Domino.Core.Objects
                 float machineScore = CalculateScore(Tile.TileOwner.Machine);
                 if (playerScore >= machineScore || playerScore <= machineScore)
                 {
-                    _isGameOver = true;
+                    IsGameOver = true;
                     return true;
                 }
             }
@@ -251,7 +262,7 @@ namespace Domino.Core.Objects
         public void TryPlaceTile(Tile tile, Vector2 dropPosition)
         {
             if (ActiveTiles.Contains(tile)) return;
-            if (_isGameOver) return;
+            if (IsGameOver) return;
             
             if (ActiveTiles.Count == 0)
             {
