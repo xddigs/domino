@@ -80,25 +80,32 @@ namespace Domino.Core.Systems
             foreach (Tile t in Table.Tiles)
             {
                 float targetScale = Tile.MaxScale;
-
                 if (t == selectedTile)
                 {
                     targetScale = Tile.MaxScale * 1.3f;
                 }
-                else if (selectedTile == null &&
-                         !Table.ActiveTiles.Contains(t) &&
-                         t.Bounds.Contains(MousePosition))
+                else if (selectedTile == null && !Table.ActiveTiles.Contains(t) 
+                && t.Bounds.Contains(MousePosition))
                 {
                     targetScale = Tile.MaxScale * 1.15f;
                 }
 
                 t.Scale = MathHelper.Lerp(t.Scale, targetScale, lerpScaleSpeed);
-
                 if (!Table.ActiveTiles.Contains(t) && t != selectedTile)
                 {
-                    t.Position =
-                        Vector2.Lerp(t.Position, t.LastPosition, 0.15f);
+                    float lerpVelocity = 0.15f;
+
+                    if (t.Owner is Tile.TileOwner.Player or Tile.TileOwner.Ai)
+                    {
+                        lerpVelocity = 0.25f;
+                    }
+
+                    t.Position = Vector2.Lerp(t.Position, t.LastPosition, 
+                        lerpVelocity);
                     t.Rotation = MathHelper.Lerp(t.Rotation, 0, 0.15f);
+
+                    if (Vector2.Distance(t.Position, t.LastPosition) < 0.1f) 
+                        t.Position = t.LastPosition;
                 }
             }
 
