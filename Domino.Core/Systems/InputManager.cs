@@ -1,4 +1,3 @@
-using System;
 using Domino.Core.Objects;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -24,7 +23,7 @@ namespace Domino.Core.Systems
 
             Vector2 mousePosition = new Vector2(
                 currentMouseState.X, currentMouseState.Y);
-            
+
             bool isLeftPressed = currentMouseState.LeftButton ==
                                  ButtonState.Pressed;
             bool isEscapePressed = currentKeyboardState.IsKeyDown(Keys.Escape);
@@ -50,9 +49,10 @@ namespace Domino.Core.Systems
                     const float scaleSpeed = 0.2f;
                     const float lerpSpeed = 0.4f;
                     const float lerpMouse = 0.6f;
-    
+
                     selectedTile.Scale = MathHelper.Lerp(
-                        selectedTile.Scale, 1.5f,
+                        selectedTile.Scale, 
+                        Tile.MaxScale * 1.3f,
                         scaleSpeed);
 
                     selectedTile.Position = Vector2.Lerp(
@@ -67,10 +67,10 @@ namespace Domino.Core.Systems
                     selectedTile.Rotation = MathHelper.Lerp(
                         selectedTile.Rotation,
                         targetRotation, lerpSpeed);
-                    
+
                     selectedTile.LastPosition = selectedTile.Position;
                     Table.UpdateGhost(
-                        draggingTile: selectedTile, 
+                        draggingTile: selectedTile,
                         mousePosition: mousePosition);
                 }
             }
@@ -85,32 +85,30 @@ namespace Domino.Core.Systems
                     Table.TryPlaceTile(selectedTile, releaseMousePosition);
                     selectedTile = null;
                 }
-                
+
                 foreach (Tile t in Table.Tiles)
                 {
-                    if (Table.ActiveTiles.Contains(t)) 
+                    if (Table.ActiveTiles.Contains(t))
                     {
-                        t.Scale = MathHelper.Lerp(t.Scale, 1.0f, lerpSpeed);
-                        continue; 
-                    }
-                    
-                    if (selectedTile != null)
-                    {
-                        Console.WriteLine($@"DROP: {selectedTile.Position} vs {mousePosition}");
+                        t.Scale = MathHelper.Lerp(
+                            t.Scale, 
+                            Tile.MaxScale,
+                            lerpSpeed);
+                        continue;
                     }
 
                     t.Rotation = MathHelper.Lerp(
-                        t.Rotation, 
+                        t.Rotation,
                         0, lerpSpeed);
-                    
+
                     t.Scale = MathHelper.Lerp(
-                        t.Scale, 
-                        1.0f, 
+                        t.Scale,
+                        Tile.MaxScale,
                         lerpSpeed);
-                    
+
                     t.Position = Vector2.Lerp(
-                        t.Position, 
-                        t.LastPosition, 
+                        t.Position,
+                        t.LastPosition,
                         lerpSpeed);
                 }
             }

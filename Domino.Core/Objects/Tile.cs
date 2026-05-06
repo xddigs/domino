@@ -14,6 +14,7 @@ namespace Domino.Core.Objects
 
         public float Rotation { get; set; }
         public float Scale { get; set; }
+        public const float MaxScale = 2f;
         public Vector2 Velocity { get; set; }
         public Vector2 LastPosition { get; set; }
 
@@ -50,7 +51,7 @@ namespace Domino.Core.Objects
             LowerValue = lowerValue;
             SourceRectangle = sourceRect;
             Position = Vector2.Zero;
-            Scale = 1.0f;
+            Scale = MaxScale;
         }
     }
 }

@@ -26,12 +26,12 @@ namespace Domino.Core.Objects
         private const int ScreenHeight = 720;
         private const int ActiveHand = 7;
         private const int TotalActive = 14;
-        private const int Spacing = 15;
         private const int BottomMargin = 40;
         private const int OffscreenOffset = 100;
         private const int BoneyardX = 60;
         private const int StackOffset = 1;
-        private const int TilePadding = -2;
+        private const int TilePadding = 1;
+        private const int Spacing = 20;
         private const float SnapThreshold = 100f;
 
         public Table(Texture2D atlas)
@@ -74,34 +74,37 @@ namespace Domino.Core.Objects
         {
             if (Atlas == null) return;
 
-            int tileWidth = Atlas.Width / Cols;
-            int tileHeight = Atlas.Height / Rows;
+            float scaledWidth = (Atlas.Width / Cols) * Tile.MaxScale;
+            float scaledHeight = (Atlas.Height / Rows) * Tile.MaxScale;
 
-            Vector2 centerOffset = new Vector2(tileWidth / 2f, tileHeight / 2f);
+            Vector2 centerOffset = new Vector2(
+                x: scaledWidth / 2f,
+                y: scaledHeight / 2f);
 
-            float handTotalWidth = (ActiveHand * (tileWidth + Spacing)) -
-                                   Spacing;
+            float handTotalWidth = (
+                ActiveHand * (scaledWidth + Spacing)) - Spacing;
 
             float handStartX = (ScreenWidth - handTotalWidth) / 2f;
-            float boneyardCenterY = (ScreenHeight / 2f) - (tileHeight / 2f);
+            float boneyardCenterY = (ScreenHeight / 2f) - (scaledHeight / 2f);
 
             for (int i = 0; i < Tiles.Count; i++)
             {
                 var tile = Tiles[i];
+                tile.Scale = Tile.MaxScale;
 
                 if (i < ActiveHand)
                 {
                     tile.Position = new Vector2(
-                        handStartX + i * (tileWidth + Spacing),
-                        ScreenHeight - tileHeight - BottomMargin
+                        x: handStartX + i * (scaledWidth + Spacing),
+                        y: ScreenHeight - scaledHeight - BottomMargin
                     );
                 }
                 else if (i < TotalActive)
                 {
                     int index = i - ActiveHand;
                     tile.Position = new Vector2(
-                        handStartX + index * (tileWidth + Spacing),
-                        -tileHeight - OffscreenOffset
+                        x: handStartX + index * (scaledWidth + Spacing),
+                        y: -scaledHeight - OffscreenOffset
                     );
                 }
                 else
@@ -118,9 +121,7 @@ namespace Domino.Core.Objects
             }
         }
 
-        public void UpdateGhost(
-            Tile draggingTile,
-            Vector2 mousePosition)
+        public void UpdateGhost(Tile draggingTile, Vector2 mousePosition)
         {
             _showGhost = false;
             if (ActiveTiles.Count == 0) return;
@@ -144,27 +145,23 @@ namespace Domino.Core.Objects
                 anchor = tail;
             }
 
-            if (anchor != null && CanConnect(
-                    newTile: draggingTile,
-                    anchor: anchor,
-                    isHead: isHead,
-                    mustFlip: out bool mustFlip))
+            if (anchor != null && CanConnect(draggingTile, anchor, isHead,
+                    out bool mustFlip))
             {
                 _ghostTile = draggingTile;
+
                 Vector2 originalPos = draggingTile.Position;
                 float originalRot = draggingTile.Rotation;
+                Vector2 originalLastPos = draggingTile.LastPosition;
 
-                SnapTo(
-                    newTile: draggingTile,
-                    anchor: anchor,
-                    isHead: isHead,
-                    mustFlip: mustFlip);
+                SnapTo(draggingTile, anchor, isHead, mustFlip);
 
                 _ghostPosition = draggingTile.Position;
                 _ghostRotation = draggingTile.Rotation;
 
                 draggingTile.Position = originalPos;
                 draggingTile.Rotation = originalRot;
+                draggingTile.LastPosition = originalLastPos;
 
                 _showGhost = true;
             }
@@ -179,7 +176,6 @@ namespace Domino.Core.Objects
                 tile.Position = new Vector2(ScreenWidth / 2f,
                     ScreenHeight / 2f);
                 tile.Rotation = 0f;
-                tile.Scale = 1.0f;
                 tile.LastPosition = tile.Position;
                 tile.HeadValue = tile.UpperValue;
                 tile.TailValue = tile.LowerValue;
@@ -203,7 +199,6 @@ namespace Domino.Core.Objects
                         anchor: head,
                         isHead: true,
                         mustFlip: mustFlip);
-                    tile.Scale = 1.0f;
                     tile.LastPosition = tile.Position;
                     ActiveTiles.AddFirst(tile);
                     return;
@@ -226,7 +221,6 @@ namespace Domino.Core.Objects
                         anchor: tail,
                         isHead: false,
                         mustFlip: mustFlip);
-                    tile.Scale = 1.0f;
                     tile.LastPosition = tile.Position;
                     ActiveTiles.AddLast(tile);
                     return;
@@ -271,8 +265,10 @@ namespace Domino.Core.Objects
         private void SnapTo(Tile newTile, Tile anchor, bool isHead,
             bool mustFlip)
         {
-            int tileHeight = Atlas.Height / Rows;
-            int tileWidth = Atlas.Width / Cols;
+            int baseWidth = Atlas.Width / Cols;
+            int baseHeight = Atlas.Height / Rows;
+            float scaledWidth = baseWidth * Tile.MaxScale;
+            float scaledHeight = baseHeight * Tile.MaxScale;
 
             Vector2 outDirection = GetAnchorDirection(isHead);
             bool isDouble = newTile.UpperValue == newTile.LowerValue;
@@ -280,13 +276,10 @@ namespace Domino.Core.Objects
 
             float distance;
             if (anchorIsDouble || isDouble)
-            {
-                distance = (tileWidth / 2f) + (tileHeight / 2f) + TilePadding;
-            }
+                distance = (scaledWidth / 2f) + (scaledHeight / 2f) + 
+                TilePadding;
             else
-            {
-                distance = tileHeight + TilePadding;
-            }
+                distance = scaledHeight + TilePadding;
 
             newTile.Position = anchor.Position + (outDirection * distance);
 
@@ -296,17 +289,11 @@ namespace Domino.Core.Objects
             }
             else
             {
-                float baseRotation;
-                if (Math.Abs(outDirection.X) > 0.5f)
-                {
-                    baseRotation = (outDirection.X < 0)
+                float baseRotation = (Math.Abs(outDirection.X) > 0.5f)
+                    ? (outDirection.X < 0
                         ? MathHelper.PiOver2
-                        : -MathHelper.PiOver2;
-                }
-                else
-                {
-                    baseRotation = (outDirection.Y < 0) ? 0f : MathHelper.Pi;
-                }
+                        : -MathHelper.PiOver2)
+                    : (outDirection.Y < 0 ? 0f : MathHelper.Pi);
 
                 newTile.Rotation =
                     mustFlip ? baseRotation + MathHelper.Pi : baseRotation;
@@ -314,8 +301,8 @@ namespace Domino.Core.Objects
 
             newTile.LastPosition = newTile.Position;
 
-            int connectingValue =
-                isHead ? anchor.HeadValue!.Value : anchor.TailValue!.Value;
+            int connectingValue = isHead ? 
+                anchor.HeadValue!.Value : anchor.TailValue!.Value;
 
             if (isHead)
             {
@@ -349,8 +336,8 @@ namespace Domino.Core.Objects
                 if (tile == selectedTile) continue;
 
                 Vector2 origin = new Vector2(
-                    tile.SourceRectangle.Width / 2f,
-                    tile.SourceRectangle.Height / 2f);
+                    x: tile.SourceRectangle.Width / 2f,
+                    y: tile.SourceRectangle.Height / 2f);
 
                 spriteBatch.Draw(
                     texture: Atlas,
@@ -368,8 +355,8 @@ namespace Domino.Core.Objects
             if (_showGhost && _ghostTile != null)
             {
                 Vector2 ghostOrigin = new Vector2(
-                    _ghostTile.SourceRectangle.Width / 2f,
-                    _ghostTile.SourceRectangle.Height / 2f);
+                    x: _ghostTile.SourceRectangle.Width / 2f,
+                    y: _ghostTile.SourceRectangle.Height / 2f);
 
                 spriteBatch.Draw(
                     texture: Atlas,
@@ -378,7 +365,7 @@ namespace Domino.Core.Objects
                     color: Color.White * 0.15f,
                     rotation: _ghostRotation,
                     origin: ghostOrigin,
-                    scale: 1.0f,
+                    scale: _ghostTile.Scale,
                     effects: SpriteEffects.None,
                     layerDepth: 0.1f
                 );
@@ -389,16 +376,16 @@ namespace Domino.Core.Objects
                 Vector2 origin = new Vector2(
                     selectedTile.SourceRectangle.Width / 2f,
                     selectedTile.SourceRectangle.Height / 2f);
-                
+
                 spriteBatch.Draw(
-                    texture: Atlas, 
+                    texture: Atlas,
                     position: selectedTile.Position,
-                    sourceRectangle: selectedTile.SourceRectangle, 
+                    sourceRectangle: selectedTile.SourceRectangle,
                     color: Color.White,
-                    selectedTile.Rotation, 
-                    origin: origin, 
+                    selectedTile.Rotation,
+                    origin: origin,
                     scale: selectedTile.Scale,
-                    effects: SpriteEffects.None, 
+                    effects: SpriteEffects.None,
                     layerDepth: 0.2f
                 );
             }
