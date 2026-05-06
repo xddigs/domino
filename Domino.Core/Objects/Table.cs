@@ -192,7 +192,9 @@ namespace Domino.Core.Objects
                 tile.LastPosition = tile.Position;
                 tile.HeadValue = tile.UpperValue;
                 tile.TailValue = tile.LowerValue;
+                tile.Owner = Tile.TileOwner.Board;
                 ActiveTiles.AddFirst(tile);
+                Layout();
                 return;
             }
 
