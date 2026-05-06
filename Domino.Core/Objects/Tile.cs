@@ -22,7 +22,7 @@ namespace Domino.Core.Objects
         public int? HeadValue { get; set; }
         public int? TailValue { get; set; }
         
-        public enum TileOwner { Boneyard, Player, Ai, Board }
+        public enum TileOwner { Boneyard, Player, Machine, Board }
         public TileOwner Owner { get; set; } = TileOwner.Boneyard;
         
         public Rectangle Bounds

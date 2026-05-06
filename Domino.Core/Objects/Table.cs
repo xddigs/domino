@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Domino.Core.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -13,15 +14,17 @@ namespace Domino.Core.Objects
         public LinkedList<Tile> ActiveTiles { get; }
         public Texture2D Atlas { get; }
         public Texture2D BackTile { get; }
-
+        
+        public Turn Turn { get; set; }
+        
         private readonly Vector2 _headDirection = new(-1, 0);
         private readonly Vector2 _tailDirection = new(1, 0);
-
+        
         private Tile _ghostTile;
         private Vector2 _ghostPosition;
         private float _ghostRotation;
         private bool _showGhost;
-
+        
         private const int Cols = 7;
         private const int Rows = 4;
         private const int ScreenWidth = 1280;
@@ -40,10 +43,14 @@ namespace Domino.Core.Objects
             ActiveTiles = [];
             Atlas = atlas;
             BackTile = backTile;
+            Turn = Turn.Player;
             Populate();
             Shuffle();
             Layout();
             Deal();
+            
+            foreach (var t in Tiles) 
+                t.Position = t.LastPosition;
         }
 
         public void Populate()
@@ -95,7 +102,7 @@ namespace Domino.Core.Objects
             }
 
             var aiTiles = Tiles.Where(
-                t => t.Owner == Tile.TileOwner.Ai).ToList();
+                t => t.Owner == Tile.TileOwner.Machine).ToList();
             
             float aiHandWidth = (aiTiles.Count * 
                                  (scaledWidth + Spacing)) - Spacing;
@@ -131,8 +138,34 @@ namespace Domino.Core.Objects
 
             for (int i = 0; i < 7; i++)
             {
-                Rob(Tile.TileOwner.Ai);
+                Rob(Tile.TileOwner.Machine);
             }
+        }
+        
+        public Turn SwitchTurn()
+        {
+            return Turn == Turn.Machine
+                ? Turn.Player : Turn.Machine;
+        }
+        
+        public void FirstTurn()
+        {
+            int playerMaxDouble = GetMaxDouble(Tile.TileOwner.Player);
+            int aiMaxDouble = GetMaxDouble(Tile.TileOwner.Machine);
+
+            if (playerMaxDouble > aiMaxDouble)
+                Turn = Turn.Player;
+            else if (aiMaxDouble > playerMaxDouble)
+                Turn = Turn.Machine;
+            else
+                Turn = Turn.Player; 
+        }
+
+        private int GetMaxDouble(Tile.TileOwner owner)
+        {
+            var doubles = Tiles.Where(t => t.Owner == owner 
+                && t.UpperValue == t.LowerValue).ToList();
+            return doubles.Count != 0 ? doubles.Max(t => t.UpperValue) : -1;
         }
         
         public void UpdateGhost(Tile draggingTile, Vector2 mousePosition)
@@ -197,6 +230,7 @@ namespace Domino.Core.Objects
                 tile.Owner = Tile.TileOwner.Board;
                 ActiveTiles.AddFirst(tile);
                 Layout();
+                Turn = SwitchTurn();
                 return;
             }
 
@@ -220,6 +254,7 @@ namespace Domino.Core.Objects
                     tile.Owner = Tile.TileOwner.Board;
                     ActiveTiles.AddFirst(tile);
                     Layout();
+                    Turn = SwitchTurn();
                     return;
                 }
             }
@@ -244,6 +279,7 @@ namespace Domino.Core.Objects
                     tile.Owner = Tile.TileOwner.Board;
                     ActiveTiles.AddLast(tile);
                     Layout();
+                    Turn = SwitchTurn();
                     return;
                 }
             }

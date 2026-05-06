@@ -13,6 +13,8 @@ namespace Domino.Core
         private readonly GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         
+        public Random Random { get; } = new();
+        
         private Background _background;
         public Table Table { get; set; }
         public Texture2D Atlas { get; set; }        
@@ -22,7 +24,7 @@ namespace Domino.Core
         public InputManager Input { get; set; }
         public Interface Interface { get; set; }
         public Texture2D Button { get; set; }
-        public Random Random { get; } = new();
+        public Machine Machine { get; set; }
         public int Score { get; set; }
         public bool IsGameOver { get; set; }
 
@@ -57,6 +59,7 @@ namespace Domino.Core
             Button = Content.Load<Texture2D>("Interface/button");
             
             Table = new Table(atlas: Atlas, backTile: BackTile);
+            Machine = new Machine(table: Table);
             Input = new InputManager(table: Table);
             Interface = new Interface(table: Table, buttonTexture: Button);
             _background = new Background(GraphicsDevice);
@@ -75,6 +78,8 @@ namespace Domino.Core
                 game: this,
                 selectedTile: ref _selectedTile,
                 gameTime: gameTime);
+            
+            Machine.Update(gameTime);
             
             Interface.Update(
                 gameTime: gameTime, 
