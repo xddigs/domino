@@ -25,8 +25,8 @@ namespace Domino.Core.Systems
         {
             var currentMouseState = Mouse.GetState();
             var currentKeyboardState = Keyboard.GetState();
-            MousePosition =
-                new Vector2(currentMouseState.X, currentMouseState.Y);
+            MousePosition = new Vector2(currentMouseState.X, 
+                currentMouseState.Y);
 
             bool isLeftPressed =
                 currentMouseState.LeftButton == ButtonState.Pressed;
@@ -40,7 +40,8 @@ namespace Domino.Core.Systems
                     {
                         Tile currentTile = Table.Tiles[i];
                         if (!Table.ActiveTiles.Contains(currentTile)
-                            && currentTile.Bounds.Contains(MousePosition))
+                            && currentTile.Bounds.Contains(MousePosition)
+                            && currentTile.Owner == Tile.TileOwner.Player)
                         {
                             selectedTile = currentTile;
                             selectedTile.Scale = Tile.MaxScale * 0.8f;
