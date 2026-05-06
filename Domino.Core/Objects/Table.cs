@@ -123,7 +123,7 @@ namespace Domino.Core.Objects
 
             var boneyardTiles = Tiles.Where(
                 t => t.Owner == Tile.TileOwner.Boneyard).ToList();
-            float boneyardCenterY = (ScreenHeight / 2f) - (scaledHeight / 2f);
+            float boneyardCenterY = 100 - (scaledHeight / 2f);
 
             for (int i = 0; i < boneyardTiles.Count; i++)
             {
@@ -362,10 +362,12 @@ namespace Domino.Core.Objects
             else
             {
                 float baseRotation = (Math.Abs(outDirection.X) > 0.5f)
-                    ? (outDirection.X < 0 ? MathHelper.PiOver2 : -MathHelper.PiOver2)
+                    ? (outDirection.X < 0 ? MathHelper.PiOver2 : 
+                        -MathHelper.PiOver2)
                     : MathHelper.PiOver2;
 
-                newTile.Rotation = mustFlip ? baseRotation + MathHelper.Pi : baseRotation;
+                newTile.Rotation = mustFlip ? 
+                    baseRotation + MathHelper.Pi : baseRotation;
             }
 
             if (!isPreview)
