@@ -30,7 +30,7 @@ namespace Domino.Core.Objects
         private const int OffscreenOffset = 100;
         private const int BoneyardX = 60;
         private const int StackOffset = 1;
-        private const int TilePadding = 1;
+        private const int TilePadding = -1;
         private const int Spacing = 20;
         private const float SnapThreshold = 100f;
 
@@ -173,8 +173,9 @@ namespace Domino.Core.Objects
 
             if (ActiveTiles.Count == 0)
             {
-                tile.Position = new Vector2(ScreenWidth / 2f,
-                    ScreenHeight / 2f);
+                tile.Position = new Vector2(
+                    x: ScreenWidth / 2f, 
+                    y: ScreenHeight / 2f);
                 tile.Rotation = 0f;
                 tile.LastPosition = tile.Position;
                 tile.HeadValue = tile.UpperValue;

@@ -35,9 +35,11 @@ namespace Domino.Core.Systems
                 {
                     for (int i = Table.Tiles.Count - 1; i >= 0; i--)
                     {
-                        if (Table.Tiles[i].Bounds.Contains(mousePosition))
+                        Tile currentTile = Table.Tiles[i];
+                        if (!Table.ActiveTiles.Contains(currentTile) 
+                            && currentTile.Bounds.Contains(mousePosition))
                         {
-                            selectedTile = Table.Tiles[i];
+                            selectedTile = currentTile;
                             selectedTile.LastPosition = selectedTile.Position;
                             break;
                         }
