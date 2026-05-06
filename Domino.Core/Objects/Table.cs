@@ -12,6 +12,7 @@ namespace Domino.Core.Objects
         public List<Tile> Tiles { get; }
         public LinkedList<Tile> ActiveTiles { get; }
         public Texture2D Atlas { get; }
+        public Texture2D BackTile { get; }
 
         private readonly Vector2 _headDirection = new(-1, 0);
         private readonly Vector2 _tailDirection = new(1, 0);
@@ -26,18 +27,19 @@ namespace Domino.Core.Objects
         private const int ScreenWidth = 1280;
         private const int ScreenHeight = 720;
         private const int BottomMargin = 40;
-        private const int OffscreenOffset = 100;
+        private const int OponentHandOffset = -150;
         private const int BoneyardX = 60;
         private const int StackOffset = 1;
         private const int TilePadding = -4;
         private const int Spacing = 20;
         private const float SnapThreshold = 100f;
 
-        public Table(Texture2D atlas)
+        public Table(Texture2D atlas, Texture2D backTile)
         {
             Tiles = [];
             ActiveTiles = [];
             Atlas = atlas;
+            BackTile = backTile;
             Populate();
             Shuffle();
             Layout();
@@ -69,7 +71,7 @@ namespace Domino.Core.Objects
                 }
             }
         }
-
+        
         public void Layout()
         {
             if (Atlas == null) return;
@@ -103,7 +105,7 @@ namespace Domino.Core.Objects
             {
                 aiTiles[i].LastPosition = new Vector2(
                     aiStartX + i * (scaledWidth + Spacing),
-                    -scaledHeight - OffscreenOffset
+                    -scaledHeight - OponentHandOffset
                 ) + centerOffset;
             }
 
@@ -341,15 +343,16 @@ namespace Domino.Core.Objects
 
         public void Rob(Tile.TileOwner newOwner)
         {
-            var tileToRob = Tiles.LastOrDefault(t => t.Owner ==
-                Tile.TileOwner.Boneyard);
+            var tileToRob = Tiles.LastOrDefault(
+                t => t.Owner == Tile.TileOwner.Boneyard);
 
             if (tileToRob != null)
             {
+                Vector2 inBoneyard = tileToRob.Position;
                 tileToRob.Owner = newOwner;
                 Layout();
-
-                tileToRob.Scale = 0.5f;
+                tileToRob.Position = inBoneyard;
+                tileToRob.Scale = 0.5f; 
             }
         }
 
@@ -367,14 +370,24 @@ namespace Domino.Core.Objects
             {
                 if (tile == selectedTile) continue;
 
-                Vector2 origin = new Vector2(
-                    x: tile.SourceRectangle.Width / 2f,
-                    y: tile.SourceRectangle.Height / 2f);
+                bool isFaceUp = tile.Owner is Tile.TileOwner.Player 
+                    or Tile.TileOwner.Board;
+    
+                Texture2D texture = isFaceUp ? Atlas : BackTile;
+                Rectangle? source = isFaceUp ? tile.SourceRectangle : null;
+
+                Vector2 origin = isFaceUp 
+                    ? new Vector2(
+                        x: tile.SourceRectangle.Width / 2f, 
+                        y: tile.SourceRectangle.Height / 2f)
+                    : new Vector2(
+                        x: BackTile.Width / 2f, 
+                        y: BackTile.Height / 2f);
 
                 spriteBatch.Draw(
-                    texture: Atlas,
+                    texture: texture,
                     position: tile.Position,
-                    sourceRectangle: tile.SourceRectangle,
+                    sourceRectangle: source,
                     color: Color.White,
                     rotation: tile.Rotation,
                     origin: origin,

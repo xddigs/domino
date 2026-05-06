@@ -16,6 +16,7 @@ namespace Domino.Core
         private Background _background;
         public Table Table { get; set; }
         public Texture2D Atlas { get; set; }        
+        public Texture2D BackTile { get; set; }
         private Tile _selectedTile;
         
         public InputManager Input { get; set; }
@@ -52,9 +53,10 @@ namespace Domino.Core
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             Atlas = Content.Load<Texture2D>("Sprites/dominoes");
+            BackTile = Content.Load<Texture2D>("Sprites/back_domino");
             Button = Content.Load<Texture2D>("Interface/button");
             
-            Table = new Table(atlas: Atlas);
+            Table = new Table(atlas: Atlas, backTile: BackTile);
             Input = new InputManager(table: Table);
             Interface = new Interface(table: Table, buttonTexture: Button);
             _background = new Background(GraphicsDevice);
