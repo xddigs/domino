@@ -14,6 +14,7 @@ namespace Domino.Core.Objects
         public LinkedList<Tile> ActiveTiles { get; }
         public Texture2D Atlas { get; }
         public Texture2D BackTile { get; }
+        public Tile StartingTile { get; private set; }
         
         public Turn Turn { get; set; }
         
@@ -64,10 +65,18 @@ namespace Domino.Core.Objects
             IsGameOver = false;
             Tiles.Clear();
             ActiveTiles.Clear();
+    
+            _headRowCount = 0;
+            _tailRowCount = 0;
+            _currentHeadDir = new Vector2(-1, 0);
+            _currentTailDir = new Vector2(1, 0);
+            StartingTile = null;
+
             Populate();
             Shuffle();
             Layout();
             Deal();
+            FirstTurn(); 
         }
         
         public void Populate()
@@ -161,24 +170,14 @@ namespace Domino.Core.Objects
 
         public bool GameStatus()
         {
-            if (CheckWin(Tile.TileOwner.Player)
-                || CheckWin(Tile.TileOwner.Machine))
+            if (CheckWin(Tile.TileOwner.Player) || 
+                CheckWin(Tile.TileOwner.Machine) || 
+                IsGameBlocked())
             {
                 IsGameOver = true;
                 return true;
             }
 
-            if (IsGameBlocked())
-            {
-                float playerScore = CalculateScore(Tile.TileOwner.Player);
-                float machineScore = CalculateScore(Tile.TileOwner.Machine);
-                if (playerScore >= machineScore || playerScore <= machineScore)
-                {
-                    IsGameOver = true;
-                    return true;
-                }
-            }
-            
             return false;
         }
         
@@ -190,24 +189,35 @@ namespace Domino.Core.Objects
         
         public void FirstTurn()
         {
-            int playerMaxDouble = GetMaxDouble(Tile.TileOwner.Player);
-            int aiMaxDouble = GetMaxDouble(Tile.TileOwner.Machine);
+            var playerDoubles = Tiles.Where(
+                t => t.Owner == Tile.TileOwner.Player 
+                     && t.UpperValue == t.LowerValue).ToList();
+            
+            var aiDoubles = Tiles.Where(
+                t => t.Owner == Tile.TileOwner.Machine
+                     && t.UpperValue == t.LowerValue).ToList();
 
-            if (playerMaxDouble > aiMaxDouble)
+            int pMax = playerDoubles.Count != 0 ? playerDoubles.Max(
+                t => t.UpperValue) : -1;
+            int aMax = aiDoubles.Count != 0 ? aiDoubles.Max(
+                t => t.UpperValue) : -1;
+
+            if (pMax > aMax)
+            {
                 Turn = Turn.Player;
-            else if (aiMaxDouble > playerMaxDouble)
+                StartingTile = playerDoubles.First(t => t.UpperValue == pMax);
+            }
+            else if (aMax > pMax)
+            {
                 Turn = Turn.Machine;
+                StartingTile = aiDoubles.First(t => t.UpperValue == aMax);
+            }
             else
-                Turn = Turn.Player; 
+            {
+                Turn = Turn.Player;
+            }
         }
 
-        private int GetMaxDouble(Tile.TileOwner owner)
-        {
-            var doubles = Tiles.Where(t => t.Owner == owner 
-                && t.UpperValue == t.LowerValue).ToList();
-            return doubles.Count != 0 ? doubles.Max(t => t.UpperValue) : -1;
-        }
-        
         public void UpdateGhost(Tile draggingTile, Vector2 mousePosition)
         {
             _showGhost = false;
