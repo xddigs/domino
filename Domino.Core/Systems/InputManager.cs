@@ -7,6 +7,7 @@ namespace Domino.Core.Systems
     public class InputManager
     {
         public Table Table { get; }
+        private Vector2 _lastMousePosition;
 
         public InputManager(Table table)
         {
@@ -40,7 +41,6 @@ namespace Domino.Core.Systems
                             && currentTile.Bounds.Contains(mousePosition))
                         {
                             selectedTile = currentTile;
-                            selectedTile.LastPosition = selectedTile.Position;
                             break;
                         }
                     }
@@ -51,7 +51,8 @@ namespace Domino.Core.Systems
                     const float scaleSpeed = 0.2f;
                     const float lerpSpeed = 0.4f;
                     const float lerpMouse = 0.6f;
-
+                    
+                    Vector2 mouseDelta = mousePosition - _lastMousePosition;
                     selectedTile.Scale = MathHelper.Lerp(
                         selectedTile.Scale, 
                         Tile.MaxScale * 1.3f,
@@ -61,16 +62,13 @@ namespace Domino.Core.Systems
                         selectedTile.Position,
                         mousePosition, lerpMouse);
 
-                    Vector2 delta = selectedTile.Position -
-                                    selectedTile.LastPosition;
-
-                    float targetRotation = delta.X * rotationSpeed;
+                    const float rotationIntensity = 0.02f; 
+                    float targetRotation = mouseDelta.X * rotationIntensity;
 
                     selectedTile.Rotation = MathHelper.Lerp(
                         selectedTile.Rotation,
                         targetRotation, lerpSpeed);
 
-                    selectedTile.LastPosition = selectedTile.Position;
                     Table.UpdateGhost(
                         draggingTile: selectedTile,
                         mousePosition: mousePosition);
@@ -114,6 +112,7 @@ namespace Domino.Core.Systems
                         lerpSpeed);
                 }
             }
+            _lastMousePosition = mousePosition;
         }
     }
 }
