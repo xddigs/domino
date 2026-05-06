@@ -26,7 +26,8 @@ namespace Domino.Core.Objects
         private Vector2 _ghostPosition;
         private float _ghostRotation;
         private bool _showGhost;
-        
+        private bool _isGameOver;
+
         private const int Cols = 7;
         private const int Rows = 4;
         private const int ScreenWidth = 1280;
@@ -146,6 +147,29 @@ namespace Domino.Core.Objects
                 Rob(Tile.TileOwner.Machine);
             }
         }
+
+        public bool GameStatus()
+        {
+            if (CheckWin(Tile.TileOwner.Player)
+                || CheckWin(Tile.TileOwner.Machine))
+            {
+                _isGameOver = true;
+                return true;
+            }
+
+            if (IsGameBlocked())
+            {
+                float playerScore = CalculateScore(Tile.TileOwner.Player);
+                float machineScore = CalculateScore(Tile.TileOwner.Machine);
+                if (playerScore >= machineScore || playerScore <= machineScore)
+                {
+                    _isGameOver = true;
+                    return true;
+                }
+            }
+            
+            return false;
+        }
         
         public Turn SwitchTurn()
         {
@@ -227,7 +251,8 @@ namespace Domino.Core.Objects
         public void TryPlaceTile(Tile tile, Vector2 dropPosition)
         {
             if (ActiveTiles.Contains(tile)) return;
-
+            if (_isGameOver) return;
+            
             if (ActiveTiles.Count == 0)
             {
                 tile.Position = new Vector2(
@@ -268,7 +293,10 @@ namespace Domino.Core.Objects
                     tile.Owner = Tile.TileOwner.Board;
                     ActiveTiles.AddFirst(tile);
                     Layout();
-                    Turn = SwitchTurn();
+                    if (!GameStatus())
+                    {
+                        Turn = SwitchTurn();
+                    }
                     return;
                 }
             }
@@ -430,7 +458,36 @@ namespace Domino.Core.Objects
             Tiles.AddRange(shuffled);
             Layout();
         }
+        
+        public bool IsGameBlocked()
+        {
+            if (Tiles.Any(t => t.Owner == Tile.TileOwner.Boneyard)) return false;
 
+            int head = ActiveTiles.First!.Value.HeadValue!.Value;
+            int tail = ActiveTiles.Last!.Value.TailValue!.Value;
+
+            bool playerCanMove = Tiles.Where(t => t.Owner == Tile.TileOwner.Player)
+                .Any(t => t.UpperValue == head || t.LowerValue == head || 
+                          t.UpperValue == tail || t.LowerValue == tail);
+    
+            bool aiCanMove = Tiles.Where(t => t.Owner == Tile.TileOwner.Machine)
+                .Any(t => t.UpperValue == head || t.LowerValue == head || 
+                          t.UpperValue == tail || t.LowerValue == tail);
+
+            return !playerCanMove && !aiCanMove;
+        }
+        
+        public bool CheckWin(Tile.TileOwner owner)
+        {
+            return Tiles.All(t => t.Owner != owner);
+        }
+        
+        public int CalculateScore(Tile.TileOwner owner)
+        {
+            return Tiles.Where(t => t.Owner == owner)
+                .Sum(t => t.UpperValue + t.LowerValue);
+        }
+        
         public void Draw(SpriteBatch spriteBatch, Tile selectedTile)
         {
             foreach (var tile in Tiles)
