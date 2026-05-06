@@ -17,7 +17,8 @@ namespace Domino.Core.UserInterface
             _buttonTexture = buttonTexture;
             Buttons = [
                 new Button(
-                    position: new Vector2(73, 450),
+                    position: new Vector2(73, 460),
+                    action: () => Table.Rob(newOwner: Tile.TileOwner.Player),
                     spriteSheet: _buttonTexture)
             ];
         }

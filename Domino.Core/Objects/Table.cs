@@ -25,8 +25,6 @@ namespace Domino.Core.Objects
         private const int Rows = 4;
         private const int ScreenWidth = 1280;
         private const int ScreenHeight = 720;
-        private const int ActiveHand = 7;
-        private const int TotalActive = 14;
         private const int BottomMargin = 40;
         private const int OffscreenOffset = 100;
         private const int BoneyardX = 60;
@@ -43,6 +41,7 @@ namespace Domino.Core.Objects
             Populate();
             Shuffle();
             Layout();
+            Deal();
         }
 
         public void Populate()
@@ -77,51 +76,63 @@ namespace Domino.Core.Objects
 
             float scaledWidth = (Atlas.Width / Cols) * Tile.MaxScale;
             float scaledHeight = (Atlas.Height / Rows) * Tile.MaxScale;
+            Vector2 centerOffset =
+                new Vector2(scaledWidth / 2f, scaledHeight / 2f);
 
-            Vector2 centerOffset = new Vector2(
-                x: scaledWidth / 2f,
-                y: scaledHeight / 2f);
+            var playerTiles = Tiles.Where(t => t.Owner == Tile.TileOwner.Player)
+                .ToList();
+            float playerHandWidth =
+                (playerTiles.Count * (scaledWidth + Spacing)) - Spacing;
+            float playerStartX = (ScreenWidth - playerHandWidth) / 2f;
 
-            float handTotalWidth = (
-                ActiveHand * (scaledWidth + Spacing)) - Spacing;
+            for (int i = 0; i < playerTiles.Count; i++)
+            {
+                playerTiles[i].LastPosition = new Vector2(
+                    playerStartX + i * (scaledWidth + Spacing),
+                    ScreenHeight - scaledHeight - BottomMargin) + centerOffset;
+            }
 
-            float handStartX = (ScreenWidth - handTotalWidth) / 2f;
+            var aiTiles = Tiles.Where(
+                t => t.Owner == Tile.TileOwner.Ai).ToList();
+            
+            float aiHandWidth = (aiTiles.Count * 
+                                 (scaledWidth + Spacing)) - Spacing;
+            float aiStartX = (ScreenWidth - aiHandWidth) / 2f;
+
+            for (int i = 0; i < aiTiles.Count; i++)
+            {
+                aiTiles[i].LastPosition = new Vector2(
+                    aiStartX + i * (scaledWidth + Spacing),
+                    -scaledHeight - OffscreenOffset
+                ) + centerOffset;
+            }
+
+            var boneyardTiles = Tiles.Where(
+                t => t.Owner == Tile.TileOwner.Boneyard).ToList();
             float boneyardCenterY = (ScreenHeight / 2f) - (scaledHeight / 2f);
 
-            for (int i = 0; i < Tiles.Count; i++)
+            for (int i = 0; i < boneyardTiles.Count; i++)
             {
-                var tile = Tiles[i];
-                tile.Scale = Tile.MaxScale;
-
-                if (i < ActiveHand)
-                {
-                    tile.Position = new Vector2(
-                        x: handStartX + i * (scaledWidth + Spacing),
-                        y: ScreenHeight - scaledHeight - BottomMargin
-                    );
-                }
-                else if (i < TotalActive)
-                {
-                    int index = i - ActiveHand;
-                    tile.Position = new Vector2(
-                        x: handStartX + index * (scaledWidth + Spacing),
-                        y: -scaledHeight - OffscreenOffset
-                    );
-                }
-                else
-                {
-                    int stackIndex = i - TotalActive;
-                    tile.Position = new Vector2(
-                        BoneyardX + (stackIndex * StackOffset),
-                        boneyardCenterY + (stackIndex * StackOffset)
-                    );
-                }
-
-                tile.Position += centerOffset;
-                tile.LastPosition = tile.Position;
+                boneyardTiles[i].LastPosition = new Vector2(
+                    BoneyardX + (i * StackOffset),
+                    boneyardCenterY + (i * StackOffset)
+                ) + centerOffset;
             }
         }
+        
+        public void Deal()
+        {
+            for (int i = 0; i < 7; i++)
+            {
+                Rob(Tile.TileOwner.Player);
+            }
 
+            for (int i = 0; i < 7; i++)
+            {
+                Rob(Tile.TileOwner.Ai);
+            }
+        }
+        
         public void UpdateGhost(Tile draggingTile, Vector2 mousePosition)
         {
             _showGhost = false;
@@ -175,7 +186,7 @@ namespace Domino.Core.Objects
             if (ActiveTiles.Count == 0)
             {
                 tile.Position = new Vector2(
-                    x: ScreenWidth / 2f, 
+                    x: ScreenWidth / 2f,
                     y: ScreenHeight / 2f);
                 tile.Rotation = 0f;
                 tile.LastPosition = tile.Position;
@@ -202,7 +213,9 @@ namespace Domino.Core.Objects
                         isHead: true,
                         mustFlip: mustFlip);
                     tile.LastPosition = tile.Position;
+                    tile.Owner = Tile.TileOwner.Board;
                     ActiveTiles.AddFirst(tile);
+                    Layout();
                     return;
                 }
             }
@@ -224,7 +237,9 @@ namespace Domino.Core.Objects
                         isHead: false,
                         mustFlip: mustFlip);
                     tile.LastPosition = tile.Position;
+                    tile.Owner = Tile.TileOwner.Board;
                     ActiveTiles.AddLast(tile);
+                    Layout();
                     return;
                 }
             }
@@ -278,8 +293,8 @@ namespace Domino.Core.Objects
 
             float distance;
             if (anchorIsDouble || isDouble)
-                distance = (scaledWidth / 2f) + (scaledHeight / 2f) + 
-                TilePadding;
+                distance = (scaledWidth / 2f) + (scaledHeight / 2f) +
+                           TilePadding;
             else
                 distance = scaledHeight + TilePadding;
 
@@ -303,8 +318,8 @@ namespace Domino.Core.Objects
 
             newTile.LastPosition = newTile.Position;
 
-            int connectingValue = isHead ? 
-                anchor.HeadValue!.Value : anchor.TailValue!.Value;
+            int connectingValue =
+                isHead ? anchor.HeadValue!.Value : anchor.TailValue!.Value;
 
             if (isHead)
             {
@@ -322,15 +337,20 @@ namespace Domino.Core.Objects
             }
         }
 
-        public void Rob()
+        public void Rob(Tile.TileOwner newOwner)
         {
-            if (ActiveTiles.Count <= 1) return;
-            foreach (Tile tile in Tiles)
+            var tileToRob = Tiles.LastOrDefault(t => t.Owner ==
+                Tile.TileOwner.Boneyard);
+
+            if (tileToRob != null)
             {
-                // TODO
+                tileToRob.Owner = newOwner;
+                Layout();
+
+                tileToRob.Scale = 0.5f;
             }
         }
-        
+
         public void Shuffle()
         {
             var shuffled = Tiles.OrderBy(a => Rng.Next()).ToList();
