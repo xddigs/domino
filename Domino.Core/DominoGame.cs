@@ -74,7 +74,10 @@ namespace Domino.Core
                 selectedTile: ref _selectedTile,
                 gameTime: gameTime);
             
-            Interface.Update(gameTime, Input.MousePosition, Input.IsMousePressed);
+            Interface.Update(
+                gameTime: gameTime, 
+                mousePosition: Input.MousePosition, 
+                mouseJustClicked: Input.IsMousePressed);
             Input.PreviousMouseState = currentMouseState;
             base.Update(gameTime);
         }
