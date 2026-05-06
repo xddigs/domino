@@ -15,27 +15,29 @@ namespace Domino.Core.UserInterface
         {
             Table = table;
             _buttonTexture = buttonTexture;
-            Buttons = [
+            Buttons =
+            [
                 new Button(
                     position: new Vector2(73, 600),
-                    action: () => Table.Rob(newOwner: Tile.TileOwner.Player),
+                    action: () => Table.GameManager.Rob(
+                        newOwner: Tile.TileOwner.Player),
                     spriteSheet: _buttonTexture)
             ];
         }
 
         public void Update(
-            GameTime gameTime, 
-            Vector2 mousePosition, 
+            GameTime gameTime,
+            Vector2 mousePosition,
             bool mouseJustClicked)
         {
             foreach (var button in Buttons)
             {
                 button.Update(
-                    mousePosition: mousePosition, 
+                    mousePosition: mousePosition,
                     mouseJustClicked: mouseJustClicked);
             }
         }
-        
+
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Begin(
@@ -49,6 +51,7 @@ namespace Domino.Core.UserInterface
             {
                 button.Draw(spriteBatch);
             }
+
             spriteBatch.End();
         }
     }

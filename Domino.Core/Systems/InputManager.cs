@@ -72,17 +72,15 @@ namespace Domino.Core.Systems
                     const float lerpMouse = 0.6f;
                     selectedTile.Position = Vector2.Lerp(selectedTile.Position,
                         MousePosition, lerpMouse);
-
                     Vector2 mouseDelta = MousePosition - LastMousePosition;
                     selectedTile.Rotation = MathHelper.Lerp(
                         selectedTile.Rotation, mouseDelta.X * 0.02f, 0.4f);
-
-                    Table.UpdateGhost(selectedTile, MousePosition);
+                    Table.Ghost.UpdateGhost(selectedTile, MousePosition);
                 }
             }
             else if (selectedTile != null)
             {
-                Table.UpdateGhost(null, Vector2.Zero);
+                Table.Ghost.UpdateGhost(null, Vector2.Zero);
                 Table.TryPlaceTile(selectedTile, MousePosition);
                 selectedTile = null;
             }

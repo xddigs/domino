@@ -98,11 +98,11 @@ namespace Domino.Core.Systems
 
             if (Table.Tiles.Any(t => t.Owner == Tile.TileOwner.Boneyard))
             {
-                Table.Rob(Tile.TileOwner.Machine);
+                Table.GameManager.Rob(Tile.TileOwner.Machine);
             }
             else
             {
-                Table.Turn = Table.SwitchTurn();
+                Table.Turn = Table.GameManager.SwitchTurn();
             }
         }
     }
