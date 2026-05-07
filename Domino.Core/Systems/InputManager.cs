@@ -81,7 +81,7 @@ namespace Domino.Core.Systems
             else if (selectedTile != null)
             {
                 Table.Ghost.UpdateGhost(null, Vector2.Zero);
-                Table.TryPlaceTile(selectedTile, MousePosition);
+                Table.GameManager.TryPlaceTile(selectedTile, MousePosition);
                 selectedTile = null;
             }
         }

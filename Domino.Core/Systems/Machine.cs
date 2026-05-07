@@ -83,15 +83,15 @@ namespace Domino.Core.Systems
                     Vector2 headPos = Table.ActiveTiles.First!.Value.Position;
                     Vector2 tailPos = Table.ActiveTiles.Last!.Value.Position;
 
-                    Table.TryPlaceTile(tile, headPos);
+                    Table.GameManager.TryPlaceTile(tile, headPos);
                     if (tile.Owner == Tile.TileOwner.Board) return;
 
-                    Table.TryPlaceTile(tile, tailPos);
+                    Table.GameManager.TryPlaceTile(tile, tailPos);
                     if (tile.Owner == Tile.TileOwner.Board) return;
                 }
                 else
                 {
-                    Table.TryPlaceTile(tile, Vector2.Zero);
+                    Table.GameManager.TryPlaceTile(tile, Vector2.Zero);
                     return;
                 }
             }
