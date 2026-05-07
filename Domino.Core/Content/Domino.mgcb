@@ -26,12 +26,12 @@
 /processorParam:TextureFormat=Compressed
 /build:Fonts/BoldPixels.spritefont
 
-#begin Fonts/Hud.spritefont
+#begin Fonts/Monocraft-SemiBold.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
-/build:Fonts/Hud.spritefont
+/build:Fonts/Monocraft-SemiBold.spritefont
 
 #begin Interface/button.png
 /importer:TextureImporter
