@@ -68,13 +68,15 @@ namespace Domino.Core.Systems
             newTile.Position = anchor.Position + moveDir * distance;
 
             if (isTurning || isDouble)
-                newTile.Rotation = 0f;
+            {
+                newTile.Rotation = mustFlip ? MathHelper.Pi : 0f;
+            }
             else
             {
-                float baseRot = (float)Math.Atan2(outDir.Y, outDir.X) -
-                                MathHelper.PiOver2;
-                newTile.Rotation =
-                    mustFlip ? baseRot + MathHelper.Pi : baseRot;
+                float baseRot = (float)Math.Atan2(
+                    outDir.Y, outDir.X) - MathHelper.PiOver2;
+                newTile.Rotation = mustFlip ? baseRot + 
+                                              MathHelper.Pi : baseRot;
             }
 
             if (!isPreview)

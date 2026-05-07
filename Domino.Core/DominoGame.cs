@@ -58,7 +58,8 @@ namespace Domino.Core
             Button = Content.Load<Texture2D>("Interface/button");
             
             SoundEffect snap = Content.Load<SoundEffect>("Sounds/click");
-            SpriteFont font = Content.Load<SpriteFont>("Fonts/BoldPixels");
+            SpriteFont font = Content.Load<SpriteFont>
+                ("Fonts/Monocraft-Semibold");
             
             Table = new Table(
                 atlas: Atlas, 
