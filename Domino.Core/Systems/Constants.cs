@@ -1,3 +1,5 @@
+using Microsoft.Xna.Framework;
+
 namespace Domino.Core.Systems
 {
     public static class Constants
@@ -21,5 +23,7 @@ namespace Domino.Core.Systems
         public const int ParticleQuantity = 12;
         public const float ParticleLifespanMin = 0.5f;
         public const float ParticleLifespanMax = 1.2f;
+
+        public static readonly Color ParticleColor = new(255, 240, 197);
     }
 }

@@ -131,7 +131,7 @@ namespace Domino.Core.Systems
                     Table.ActiveTiles.AddFirst(tile);
                     Table.ParticleSystem.Emit(
                         position: tile.Position, 
-                        color: Color.White, 
+                        color: Constants.ParticleColor, 
                         count: 15);
                     Table.LayoutManager.SetLayout();
                     if (!Table.Rules.GameStatus())
@@ -164,7 +164,7 @@ namespace Domino.Core.Systems
                     Table.ActiveTiles.AddLast(tile);
                     Table.ParticleSystem.Emit(
                         position: tile.Position, 
-                        color: Color.White, 
+                        color: Constants.ParticleColor, 
                         count: 15);
                     Table.LayoutManager.SetLayout();
                     Table.Turn = SwitchTurn();
