@@ -26,7 +26,9 @@ namespace Domino.Core.Objects
         public Vector2 CurrentTailDir { get; set; } = new(1, 0);
         public int HeadRowCount { get; set; }
         public int TailRowCount { get; set; }
-
+        public int HeadSegmentIndex { get; set; }
+        public int TailSegmentIndex { get; set; }
+        
         public bool IsGameOver { get; set; }
 
         public Table(Texture2D atlas, Texture2D backTile)
@@ -61,6 +63,8 @@ namespace Domino.Core.Objects
 
             HeadRowCount = 0;
             TailRowCount = 0;
+            HeadSegmentIndex = 0;
+            TailSegmentIndex = 0;
             CurrentHeadDir = new Vector2(-1, 0);
             CurrentTailDir = new Vector2(1, 0);
             StartingTile = null;

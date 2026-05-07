@@ -26,13 +26,20 @@ namespace Domino.Core.Systems
             float scaledWidth = baseWidth * Tile.MaxScale;
             float scaledHeight = baseHeight * Tile.MaxScale;
 
-            Vector2 outDir =
-                isHead ? Table.CurrentHeadDir : Table.CurrentTailDir;
-            int currentCount =
-                isHead ? Table.HeadRowCount : Table.TailRowCount;
+            Vector2 outDir = isHead ? 
+                Table.CurrentHeadDir : Table.CurrentTailDir;
+            int currentCount = isHead ? 
+                Table.HeadRowCount : Table.TailRowCount;
+    
+            int segmentIndex = isHead ? 
+                Table.HeadSegmentIndex : Table.TailSegmentIndex;
+    
+            int currentLimit = (segmentIndex == 0) 
+                ? Constants.MaxTilesPerRow 
+                : Constants.MaxTilesPerRow * 2; 
 
             bool isDouble = newTile.UpperValue == newTile.LowerValue;
-            bool isTurning = currentCount >= Constants.MaxTilesPerRow;
+            bool isTurning = currentCount >= currentLimit;
 
             Vector2 moveDir = isTurning ? new Vector2(0, 1) : outDir;
 
@@ -41,31 +48,27 @@ namespace Domino.Core.Systems
 
             bool newHorizontal = !(isTurning || isDouble);
 
-            float anchorExtent = TableToolbox.GetExtentInDirection(
-                rotation: anchor.Rotation,
-                dir: moveDir,
-                width: scaledWidth,
-                height: scaledHeight);
+            float anchorExtent =
+                TableToolbox.GetExtentInDirection(
+                    rotation: anchor.Rotation, 
+                    dir: moveDir,
+                    width: scaledWidth, 
+                    height: scaledHeight);
             float newExtent = TableToolbox.GetExtentInDirection(
-                rotation: (isTurning || isDouble)
+                (isTurning || isDouble)
                     ? 0f
                     : (mustFlip
                         ? (float)Math.Atan2(outDir.Y, outDir.X) -
                         MathHelper.PiOver2 + MathHelper.Pi
                         : (float)Math.Atan2(outDir.Y, outDir.X) -
                           MathHelper.PiOver2),
-                dir: moveDir,
-                width: scaledWidth,
-                height: scaledHeight
-            );
+                moveDir, scaledWidth, scaledHeight);
 
             float distance = anchorExtent + newExtent + Constants.TilePadding;
-
             newTile.Position = anchor.Position + moveDir * distance;
+
             if (isTurning || isDouble)
-            {
                 newTile.Rotation = 0f;
-            }
             else
             {
                 float baseRot = (float)Math.Atan2(outDir.Y, outDir.X) -
@@ -78,8 +81,10 @@ namespace Domino.Core.Systems
             {
                 if (isTurning)
                 {
-                    if (isHead) {
+                    if (isHead)
+                    {
                         Table.HeadRowCount = 0;
+                        Table.HeadSegmentIndex++;
                         Table.CurrentHeadDir = Table.CurrentHeadDir with
                         {
                             X = Table.CurrentHeadDir.X * -1
@@ -88,6 +93,7 @@ namespace Domino.Core.Systems
                     else
                     {
                         Table.TailRowCount = 0;
+                        Table.TailSegmentIndex++;
                         Table.CurrentTailDir = Table.CurrentTailDir with
                         {
                             X = Table.CurrentTailDir.X * -1
@@ -102,22 +108,22 @@ namespace Domino.Core.Systems
             }
 
             newTile.LastPosition = newTile.Position;
-            int connVal = isHead
+            int value = isHead
                 ? anchor.HeadValue!.Value
                 : anchor.TailValue!.Value;
             if (isHead)
             {
-                newTile.HeadValue = (newTile.UpperValue == connVal)
+                newTile.HeadValue = (newTile.UpperValue == value)
                     ? newTile.LowerValue
                     : newTile.UpperValue;
-                newTile.TailValue = connVal;
+                newTile.TailValue = value;
             }
             else
             {
-                newTile.TailValue = (newTile.UpperValue == connVal)
+                newTile.TailValue = (newTile.UpperValue == value)
                     ? newTile.LowerValue
                     : newTile.UpperValue;
-                newTile.HeadValue = connVal;
+                newTile.HeadValue = value;
             }
         }
     }
