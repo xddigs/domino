@@ -94,7 +94,7 @@ namespace Domino.Core.Systems
                 if (tile != Table.StartingTile) return;
                 tile.Position = new Vector2(
                     x: Constants.ScreenWidth / 2f,
-                    y: Constants.ScreenHeight / 2f);
+                    y: Constants.ScreenHeight / 2f - 100);
                 tile.Rotation = 0f;
                 tile.LastPosition = tile.Position;
                 tile.HeadValue = tile.UpperValue;
