@@ -44,6 +44,12 @@
 /processorParam:TextureFormat=Color
 /build:Interface/button2.png
 
+#begin Sounds/click.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/click.wav
+
 #begin Sprites/back_domino.png
 /importer:TextureImporter
 /processor:TextureProcessor
