@@ -25,7 +25,9 @@ namespace Domino.Core.Systems
         {
             var mState = Mouse.GetState();
             var kState = Keyboard.GetState();
-            MousePosition = new Vector2(mState.X, mState.Y);
+            Matrix inverseTransform = Matrix.Invert(game.GlobalTransform);
+            MousePosition = Vector2.Transform(new Vector2(mState.X, mState.Y), 
+                inverseTransform);
 
             if (kState.IsKeyDown(Keys.Escape)) game.Exit();
             

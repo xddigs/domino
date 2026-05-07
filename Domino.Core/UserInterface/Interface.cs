@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Domino.Core.Objects;
+using Domino.Core.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -18,7 +19,7 @@ namespace Domino.Core.UserInterface
             Buttons =
             [
                 new Button(
-                    position: new Vector2(73, 600),
+                    position: Constants.ButtonLocation,
                     action: () => Table.GameManager.Rob(
                         newOwner: Tile.TileOwner.Player),
                     spriteSheet: _buttonTexture)

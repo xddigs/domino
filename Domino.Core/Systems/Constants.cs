@@ -17,13 +17,14 @@ namespace Domino.Core.Systems
         public const int Spacing = 20;
         public const int MaxTilesPerRow = 4;
         public const float SnapThreshold = 100f;
-        
+
+        public static readonly Vector2 ButtonLocation = new(73, 600);
+
         public const float ParticleScale = 6f;
         public const float ParticleBaseAlpha = 1f;
         public const int ParticleQuantity = 8;
         public const float ParticleLifespanMin = 0.5f;
         public const float ParticleLifespanMax = 0.8f;
-        public const bool ParticleHasBorder = true;
         public const float ParticleBorderThickness = 4f;
         public const float TextLifespan = 1.0f;
         public const float TextScale = 1.8f;
@@ -36,6 +37,8 @@ namespace Domino.Core.Systems
         public const float StartScale = 0f;
         public const float MaxPopScale = 1.3f;
         public const float FinalScale = 1.0f;
+        
+        public const bool ParticleHasBorder = true;
         
         public static readonly Color ParticleColor = new(255, 240, 197);
         public static readonly Color ParticleBorderColor = Color.Black;
