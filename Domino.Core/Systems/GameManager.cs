@@ -105,6 +105,8 @@ namespace Domino.Core.Systems
                 Table.TailRowCount = 0;
                 Table.CurrentHeadDir = new Vector2(-1, 0);
                 Table.CurrentTailDir = new Vector2(1, 0);
+                Table.Scoring.Add(Table.Turn, (int)
+                    (tile.HeadValue + tile.TailValue)!);
                 Table.SnapSound.Play();
                 Table.Book.Add(
                     text: $"+{tile.HeadValue + tile.TailValue}", 
@@ -139,13 +141,11 @@ namespace Domino.Core.Systems
                         position: snapPoint, 
                         color: Constants.ParticleColor, 
                         count: Constants.ParticleQuantity);
+                    int? currentScore = tile.HeadValue + tile.TailValue;
+                    Table.Scoring.Add(Table.Turn, (int)currentScore!);
                     Table.SnapSound.Play();
                     Table.Book.Add(
-                        text: "SNAP!",
-                        position: tile.Position + Vector2.One, 
-                        color: Color.Crimson);
-                    Table.Book.Add(
-                        text: $"+{tile.HeadValue + tile.TailValue}", 
+                        text: $"+{currentScore}", 
                         position: tile.Position, 
                         color: Color.Gold);
                     Table.LayoutManager.SetLayout();
@@ -182,13 +182,11 @@ namespace Domino.Core.Systems
                         position: snapPoint, 
                         color: Constants.ParticleColor, 
                         count: Constants.ParticleQuantity);
+                    int? currentScore = tile.HeadValue + tile.TailValue;
+                    Table.Scoring.Add(Table.Turn, (int)currentScore!);
                     Table.SnapSound.Play();
                     Table.Book.Add(
-                        text: "SNAP!",
-                        position: tile.Position + Vector2.One, 
-                        color: Color.Crimson);
-                    Table.Book.Add(
-                        text: $"+{tile.HeadValue + tile.TailValue}", 
+                        text: $"+{currentScore}", 
                         position: tile.Position, 
                         color: Color.Gold);
                     Table.LayoutManager.SetLayout();

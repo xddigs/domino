@@ -14,6 +14,7 @@ namespace Domino.Core.Objects
         public GameManager GameManager { get; }
         public Snapper Snapper { get; }
         public Ghost Ghost { get; }
+        public Scoring Scoring { get; }
         public Book Book { get; }
         public ParticleSystem ParticleSystem { get; }
         
@@ -54,9 +55,10 @@ namespace Domino.Core.Objects
             GameManager = new GameManager(this);
             Snapper = new Snapper(this);
             Ghost = new Ghost(this);
+            Scoring = new Scoring(this);
+            Book = new Book(font);
             ParticleSystem = new ParticleSystem(
                 atlas.GraphicsDevice);
-            Book = new Book(font);
             
             GameManager.Populate();
             GameManager.Shuffle();
