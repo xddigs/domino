@@ -15,5 +15,11 @@ namespace Domino.Core.Systems
         public const int Spacing = 20;
         public const int MaxTilesPerRow = 4;
         public const float SnapThreshold = 100f;
+        
+        public const float ParticleScale = 4f;
+        public const float ParticleBaseAlpha = 1f;
+        public const int ParticleQuantity = 12;
+        public const float ParticleLifespanMin = 0.5f;
+        public const float ParticleLifespanMax = 1.2f;
     }
 }

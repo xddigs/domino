@@ -17,7 +17,7 @@ namespace Domino.Core
         
         private Background _background;
         public Table Table { get; set; }
-        public Texture2D Atlas { get; set; }        
+        public Texture2D Atlas { get; set; }
         public Texture2D BackTile { get; set; }
         private Tile _selectedTile;
         
@@ -72,6 +72,7 @@ namespace Domino.Core
             _background.Update(gameTime);
 
             bool wasMousePressed = Input.IsMousePressed;
+            Table.Update(gameTime);
             Input.Update(
                 game: this,
                 selectedTile: ref _selectedTile,

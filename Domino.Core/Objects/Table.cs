@@ -12,7 +12,8 @@ namespace Domino.Core.Objects
         public LayoutManager LayoutManager { get; }
         public GameManager GameManager { get; }
         public Snapper Snapper { get; }
-        public Ghost Ghost { get; set; }
+        public Ghost Ghost { get; }
+        public ParticleSystem ParticleSystem { get; private set; }
         
         public List<Tile> Tiles { get; }
         public LinkedList<Tile> ActiveTiles { get; }
@@ -38,6 +39,7 @@ namespace Domino.Core.Objects
             GameManager = new GameManager(this);
             Snapper = new Snapper(this);
             Ghost = new Ghost(this);
+            ParticleSystem = new ParticleSystem(atlas.GraphicsDevice);
             
             Tiles = [];
             ActiveTiles = [];
@@ -76,6 +78,11 @@ namespace Domino.Core.Objects
             Rules.FirstTurn();
         }
 
+        public void Update(GameTime gameTime)
+        {
+            ParticleSystem.Update(gameTime);
+        }
+        
         public void Draw(SpriteBatch spriteBatch, Tile selectedTile)
         {
             foreach (var tile in Tiles)
@@ -146,6 +153,8 @@ namespace Domino.Core.Objects
                     layerDepth: 0.2f
                 );
             }
+            
+            ParticleSystem.Draw(spriteBatch);
         }
     }
 }

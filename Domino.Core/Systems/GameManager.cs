@@ -83,7 +83,7 @@ namespace Domino.Core.Systems
                 ? Turn.Player
                 : Turn.Machine;
         }
-        
+
         public void TryPlaceTile(Tile tile, Vector2 dropPosition)
         {
             if (Table.ActiveTiles.Contains(tile)) return;
@@ -129,6 +129,10 @@ namespace Domino.Core.Systems
                     tile.LastPosition = tile.Position;
                     tile.Owner = Tile.TileOwner.Board;
                     Table.ActiveTiles.AddFirst(tile);
+                    Table.ParticleSystem.Emit(
+                        position: tile.Position, 
+                        color: Color.White, 
+                        count: 15);
                     Table.LayoutManager.SetLayout();
                     if (!Table.Rules.GameStatus())
                     {
@@ -158,6 +162,10 @@ namespace Domino.Core.Systems
                     tile.LastPosition = tile.Position;
                     tile.Owner = Tile.TileOwner.Board;
                     Table.ActiveTiles.AddLast(tile);
+                    Table.ParticleSystem.Emit(
+                        position: tile.Position, 
+                        color: Color.White, 
+                        count: 15);
                     Table.LayoutManager.SetLayout();
                     Table.Turn = SwitchTurn();
                     return;
