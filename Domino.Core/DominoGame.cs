@@ -69,7 +69,7 @@ namespace Domino.Core
             Machine = new Machine(table: Table);
             Input = new InputManager(table: Table);
             Interface = new Interface(table: Table, buttonTexture: Button);
-            _background = new Background(GraphicsDevice);
+            _background = new Background(GraphicsDevice, Content);
             
             _selectedTile = null;
             base.LoadContent();
