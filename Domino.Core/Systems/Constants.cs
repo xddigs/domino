@@ -25,6 +25,8 @@ namespace Domino.Core.Systems
         public const float ParticleLifespanMax = 1.0f;
         public const bool ParticleHasBorder = true;
         public const float ParticleBorderThickness = 4f;
+        public const float TextLifespan = 1.5f;
+        public const float TextScale = 1.8f;
 
         public static readonly Color ParticleColor = new(255, 240, 197);
         public static readonly Color ParticleBorderColor = Color.Black;

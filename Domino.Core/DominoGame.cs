@@ -58,8 +58,14 @@ namespace Domino.Core
             Button = Content.Load<Texture2D>("Interface/button");
             
             SoundEffect snap = Content.Load<SoundEffect>("Sounds/click");
+            SpriteFont font = Content.Load<SpriteFont>("Fonts/BoldPixels");
             
-            Table = new Table(atlas: Atlas, backTile: BackTile, snap: snap);
+            Table = new Table(
+                atlas: Atlas, 
+                backTile: BackTile, 
+                font: font, 
+                snap: snap);
+            
             Machine = new Machine(table: Table);
             Input = new InputManager(table: Table);
             Interface = new Interface(table: Table, buttonTexture: Button);

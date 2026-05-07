@@ -106,6 +106,10 @@ namespace Domino.Core.Systems
                 Table.CurrentHeadDir = new Vector2(-1, 0);
                 Table.CurrentTailDir = new Vector2(1, 0);
                 Table.SnapSound.Play();
+                Table.Book.Add(
+                    text: $"+{tile.HeadValue + tile.TailValue}", 
+                    position: tile.Position, 
+                    color: Color.Gold);
                 Table.LayoutManager.SetLayout();
                 Table.Turn = SwitchTurn();
                 return;
@@ -136,6 +140,14 @@ namespace Domino.Core.Systems
                         color: Constants.ParticleColor, 
                         count: Constants.ParticleQuantity);
                     Table.SnapSound.Play();
+                    Table.Book.Add(
+                        text: "SNAP!",
+                        position: tile.Position + Vector2.One, 
+                        color: Color.Crimson);
+                    Table.Book.Add(
+                        text: $"+{tile.HeadValue + tile.TailValue}", 
+                        position: tile.Position, 
+                        color: Color.Gold);
                     Table.LayoutManager.SetLayout();
                     if (!Table.Rules.GameStatus())
                     {
@@ -171,6 +183,14 @@ namespace Domino.Core.Systems
                         color: Constants.ParticleColor, 
                         count: Constants.ParticleQuantity);
                     Table.SnapSound.Play();
+                    Table.Book.Add(
+                        text: "SNAP!",
+                        position: tile.Position + Vector2.One, 
+                        color: Color.Crimson);
+                    Table.Book.Add(
+                        text: $"+{tile.HeadValue + tile.TailValue}", 
+                        position: tile.Position, 
+                        color: Color.Gold);
                     Table.LayoutManager.SetLayout();
                     Table.Turn = SwitchTurn();
                     return;

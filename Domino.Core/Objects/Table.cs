@@ -14,7 +14,8 @@ namespace Domino.Core.Objects
         public GameManager GameManager { get; }
         public Snapper Snapper { get; }
         public Ghost Ghost { get; }
-        public ParticleSystem ParticleSystem { get; private set; }
+        public Book Book { get; }
+        public ParticleSystem ParticleSystem { get; }
         
         public List<Tile> Tiles { get; }
         public LinkedList<Tile> ActiveTiles { get; }
@@ -38,6 +39,7 @@ namespace Domino.Core.Objects
         public Table(
             Texture2D atlas, 
             Texture2D backTile,
+            SpriteFont font,
             SoundEffect snap)
         {
             SnapSound = snap;
@@ -54,6 +56,7 @@ namespace Domino.Core.Objects
             Ghost = new Ghost(this);
             ParticleSystem = new ParticleSystem(
                 atlas.GraphicsDevice);
+            Book = new Book(font);
             
             GameManager.Populate();
             GameManager.Shuffle();
@@ -90,6 +93,7 @@ namespace Domino.Core.Objects
         public void Update(GameTime gameTime)
         {
             ParticleSystem.Update(gameTime);
+            Book.Update(gameTime);
         }
         
         public void Draw(SpriteBatch spriteBatch, Tile selectedTile)
@@ -164,6 +168,7 @@ namespace Domino.Core.Objects
             }
             
             ParticleSystem.Draw(spriteBatch);
+            Book.Draw(spriteBatch);
         }
     }
 }
