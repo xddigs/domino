@@ -48,15 +48,31 @@ namespace Domino.Core.Systems
 
         public void Draw(SpriteBatch spriteBatch)
         {
+            Vector2 origin = new Vector2(0.5f, 0.5f);
             foreach (var p in _particles)
             {
+                if (Constants.ParticleHasBorder)
+                {
+                    spriteBatch.Draw(
+                        texture: _pixel,
+                        position: p.Position,
+                        sourceRectangle: null,
+                        color: Constants.ParticleBorderColor,
+                        rotation: 0f,
+                        origin: origin,
+                        scale: Constants.ParticleScale + 
+                        Constants.ParticleBorderThickness,
+                        effects: SpriteEffects.None,
+                        layerDepth: 0f);
+                }
+                
                 spriteBatch.Draw(
                     texture: _pixel,
                     position: p.Position,
                     sourceRectangle: null,
-                    color: p.Color * p.Alpha,
+                    color: p.Color,
                     rotation: 0f,
-                    origin: Vector2.Zero,
+                    origin: origin,
                     scale: Constants.ParticleScale,
                     effects: SpriteEffects.None,
                     layerDepth: 0f);

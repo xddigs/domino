@@ -105,6 +105,7 @@ namespace Domino.Core.Systems
                 Table.TailRowCount = 0;
                 Table.CurrentHeadDir = new Vector2(-1, 0);
                 Table.CurrentTailDir = new Vector2(1, 0);
+                Table.SnapSound.Play();
                 Table.LayoutManager.SetLayout();
                 Table.Turn = SwitchTurn();
                 return;
@@ -126,13 +127,15 @@ namespace Domino.Core.Systems
                         anchor: head,
                         isHead: true,
                         mustFlip: mustFlip);
+                    Vector2 snapPoint = (tile.Position + head.Position) / 2f;
                     tile.LastPosition = tile.Position;
                     tile.Owner = Tile.TileOwner.Board;
                     Table.ActiveTiles.AddFirst(tile);
                     Table.ParticleSystem.Emit(
-                        position: tile.Position, 
+                        position: snapPoint, 
                         color: Constants.ParticleColor, 
-                        count: 15);
+                        count: Constants.ParticleQuantity);
+                    Table.SnapSound.Play();
                     Table.LayoutManager.SetLayout();
                     if (!Table.Rules.GameStatus())
                     {
@@ -159,13 +162,15 @@ namespace Domino.Core.Systems
                         anchor: tail,
                         isHead: false,
                         mustFlip: mustFlip);
+                    Vector2 snapPoint = (tile.Position + tail.Position) / 2f;
                     tile.LastPosition = tile.Position;
                     tile.Owner = Tile.TileOwner.Board;
                     Table.ActiveTiles.AddLast(tile);
                     Table.ParticleSystem.Emit(
-                        position: tile.Position, 
+                        position: snapPoint, 
                         color: Constants.ParticleColor, 
-                        count: 15);
+                        count: Constants.ParticleQuantity);
+                    Table.SnapSound.Play();
                     Table.LayoutManager.SetLayout();
                     Table.Turn = SwitchTurn();
                     return;

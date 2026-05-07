@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Domino.Core.Systems;
 using Domino.Core.Visuals;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Domino.Core.Objects
@@ -30,22 +31,30 @@ namespace Domino.Core.Objects
         public int HeadSegmentIndex { get; set; }
         public int TailSegmentIndex { get; set; }
         
+        public SoundEffect SnapSound { get; set; }
+        
         public bool IsGameOver { get; set; }
 
-        public Table(Texture2D atlas, Texture2D backTile)
+        public Table(
+            Texture2D atlas, 
+            Texture2D backTile,
+            SoundEffect snap)
         {
-            Rules = new Rules(this);
-            LayoutManager = new LayoutManager(this);
-            GameManager = new GameManager(this);
-            Snapper = new Snapper(this);
-            Ghost = new Ghost(this);
-            ParticleSystem = new ParticleSystem(atlas.GraphicsDevice);
-            
+            SnapSound = snap;
             Tiles = [];
             ActiveTiles = [];
             Atlas = atlas;
             BackTile = backTile;
             Turn = Turn.Player;
+            
+            Rules = new Rules(this);
+            LayoutManager = new LayoutManager(this);
+            GameManager = new GameManager(this);
+            Snapper = new Snapper(this);
+            Ghost = new Ghost(this);
+            ParticleSystem = new ParticleSystem(
+                atlas.GraphicsDevice);
+            
             GameManager.Populate();
             GameManager.Shuffle();
             LayoutManager.SetLayout();

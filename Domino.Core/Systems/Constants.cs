@@ -18,12 +18,16 @@ namespace Domino.Core.Systems
         public const int MaxTilesPerRow = 4;
         public const float SnapThreshold = 100f;
         
-        public const float ParticleScale = 4f;
+        public const float ParticleScale = 6f;
         public const float ParticleBaseAlpha = 1f;
-        public const int ParticleQuantity = 12;
+        public const int ParticleQuantity = 8;
         public const float ParticleLifespanMin = 0.5f;
-        public const float ParticleLifespanMax = 1.2f;
+        public const float ParticleLifespanMax = 1.0f;
+        public const bool ParticleHasBorder = true;
+        public const float ParticleBorderThickness = 4f;
 
         public static readonly Color ParticleColor = new(255, 240, 197);
+        public static readonly Color ParticleBorderColor = Color.Black;
+        
     }
 }

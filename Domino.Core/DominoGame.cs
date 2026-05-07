@@ -3,6 +3,7 @@ using Domino.Core.Objects;
 using Domino.Core.Systems;
 using Domino.Core.UserInterface;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -25,7 +26,7 @@ namespace Domino.Core
         public Interface Interface { get; set; }
         public Texture2D Button { get; set; }
         public Machine Machine { get; set; }
-
+        
         public static readonly bool IsMobile = OperatingSystem.IsAndroid() ||
                                                 OperatingSystem.IsIOS();
 
@@ -56,7 +57,9 @@ namespace Domino.Core
             BackTile = Content.Load<Texture2D>("Sprites/back_domino");
             Button = Content.Load<Texture2D>("Interface/button");
             
-            Table = new Table(atlas: Atlas, backTile: BackTile);
+            SoundEffect snap = Content.Load<SoundEffect>("Sounds/click");
+            
+            Table = new Table(atlas: Atlas, backTile: BackTile, snap: snap);
             Machine = new Machine(table: Table);
             Input = new InputManager(table: Table);
             Interface = new Interface(table: Table, buttonTexture: Button);
