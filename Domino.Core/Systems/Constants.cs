@@ -27,7 +27,16 @@ namespace Domino.Core.Systems
         public const float ParticleBorderThickness = 4f;
         public const float TextLifespan = 1.0f;
         public const float TextScale = 1.8f;
-
+        
+        public const float DefaultLifespan = 1.5f;
+        public const float InitialVelocityY = -1.2f;
+        public const float PopInDuration = 0.2f;
+        public const float SettleDuration = 0.2f;
+            
+        public const float StartScale = 0f;
+        public const float MaxPopScale = 1.3f;
+        public const float FinalScale = 1.0f;
+        
         public static readonly Color ParticleColor = new(255, 240, 197);
         public static readonly Color ParticleBorderColor = Color.Black;
         
